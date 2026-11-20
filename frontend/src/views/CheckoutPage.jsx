@@ -56,10 +56,10 @@ export const CheckoutPage = () => {
   const [appliedDiscount, setAppliedDiscount] = useState(null); // { code: 'WELCOME10', percent: 10 }
   const [discountError, setDiscountError] = useState('');
 
-  // Payment State
-  const [cardNumber, setCardNumber] = useState('4242 •••• •••• 4242');
-  const [cardExpiry, setCardExpiry] = useState('12/28');
-  const [cardCvc, setCardCvc] = useState('888');
+  // Payment State (Live Payment Flow - Finding H5)
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
   const [nameOnCard, setNameOnCard] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -469,14 +469,20 @@ export const CheckoutPage = () => {
 
                 <div className="payment-fields-grid">
                   <div className="checkout-field-group payment-card-num-group">
-                    <label>Card Number (Simulation Enabled)</label>
+                    <label>Card Number</label>
                     <div className="card-input-wrapper">
                       <CreditCard size={18} className="card-icon-inside" />
                       <input
                         type="text"
+                        required
                         value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value)}
-                        placeholder="4242 •••• •••• 4242"
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 16);
+                          const formatted = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+                          setCardNumber(formatted);
+                        }}
+                        placeholder="4532 •••• •••• ••••"
+                        maxLength={19}
                       />
                     </div>
                   </div>
@@ -484,18 +490,28 @@ export const CheckoutPage = () => {
                     <label>Expiry</label>
                     <input
                       type="text"
+                      required
                       value={cardExpiry}
-                      onChange={(e) => setCardExpiry(e.target.value)}
-                      placeholder="MM/YY"
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        if (val.length >= 3) {
+                          val = val.slice(0, 2) + '/' + val.slice(2);
+                        }
+                        setCardExpiry(val);
+                      }}
+                      placeholder="MM / YY"
+                      maxLength={5}
                     />
                   </div>
                   <div className="checkout-field-group">
                     <label>CVC</label>
                     <input
                       type="text"
+                      required
                       value={cardCvc}
-                      onChange={(e) => setCardCvc(e.target.value)}
+                      onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
                       placeholder="CVC"
+                      maxLength={4}
                     />
                   </div>
                 </div>
@@ -635,13 +651,22 @@ export const CheckoutPage = () => {
                 </div>
               </div>
 
-              {/* Warehouse Guarantee */}
-              <div className="checkout-warehouse-guarantee">
-                <Building size={16} color="var(--accent-gold)" />
-                <p>
-                  Pick up at <strong>705 Progress Ave #32, Scarborough, ON</strong> with your Order Pass code.
-                </p>
-              </div>
+              {/* Warehouse / Delivery Guarantee (Finding H5) */}
+              {fulfillmentType === 'pickup' ? (
+                <div className="checkout-warehouse-guarantee">
+                  <Building size={16} color="var(--accent-gold)" />
+                  <p>
+                    Pick up at <strong>705 Progress Ave #32, Scarborough, ON</strong> with your digital Order Pass.
+                  </p>
+                </div>
+              ) : (
+                <div className="checkout-warehouse-guarantee">
+                  <Truck size={16} color="var(--accent-gold)" />
+                  <p>
+                    Direct courier delivery to <strong>{street ? `${street}, ${city}` : 'your Ontario destination'}</strong>. Dispatches in 1–2 business days.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

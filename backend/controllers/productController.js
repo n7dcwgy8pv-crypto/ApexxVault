@@ -327,30 +327,36 @@ export const sanitizeAndDeduplicateCatalog = async (req, res) => {
       else if (lowerTitle.includes('allora')) item.brand = 'Allora Plus';
       else if (lowerTitle.includes('fusion')) item.brand = 'Fusion';
 
-      // 3. Proper Categorization (Fixing A7: everything was categorized as "electronics")
+      // 3. Proper Categorization (Prioritize Tools & Hardware; avoid substring collisions like 'brushless' -> 'brush')
       if (
+        lowerTitle.includes('dewalt') || lowerTitle.includes('milwaukee') || lowerTitle.includes('drill') ||
+        lowerTitle.includes('saw') || lowerTitle.includes('miter') || lowerTitle.includes('impact') ||
+        lowerTitle.includes('tool') || lowerTitle.includes('hardware') || lowerTitle.includes('socket') ||
+        lowerTitle.includes('wrench') || lowerTitle.includes('bosch') || lowerTitle.includes('makita')
+      ) {
+        item.category = 'tools';
+      } else if (
         lowerTitle.includes('wash') || lowerTitle.includes('soap') || lowerTitle.includes('wipes') ||
-        lowerTitle.includes('castor oil') || lowerTitle.includes('oil') || lowerTitle.includes('pads') ||
-        lowerTitle.includes('razor') || lowerTitle.includes('brush') || lowerTitle.includes('lotion') ||
-        lowerTitle.includes('glotion') || lowerTitle.includes('cocoa butter') || lowerTitle.includes('glycolic') ||
-        lowerTitle.includes('beauty') || lowerTitle.includes('clip') || lowerTitle.includes('duckbill')
+        lowerTitle.includes('castor oil') || lowerTitle.includes('pads') || lowerTitle.includes('razor') ||
+        lowerTitle.includes('lotion') || lowerTitle.includes('glotion') || lowerTitle.includes('cocoa butter') ||
+        lowerTitle.includes('glycolic') || lowerTitle.includes('beauty') || lowerTitle.includes('hair clip') ||
+        lowerTitle.includes('duckbill') || (lowerTitle.includes('brush') && !lowerTitle.includes('brushless')) ||
+        lowerTitle.includes('oral-b') || lowerTitle.includes('sonicare') || lowerTitle.includes('skincare')
       ) {
         item.category = 'health_beauty';
-      } else if (lowerTitle.includes('dog') || lowerTitle.includes('cat') || lowerTitle.includes('muzzle') || lowerTitle.includes('pet hair') || lowerTitle.includes('glove')) {
+      } else if (lowerTitle.includes('dog') || lowerTitle.includes('cat') || lowerTitle.includes('muzzle') || lowerTitle.includes('pet hair') || lowerTitle.includes('glove') || lowerTitle.includes('pet')) {
         item.category = 'pets';
-      } else if (lowerTitle.includes('boot') || lowerTitle.includes('shoe') || lowerTitle.includes('snow boots') || lowerTitle.includes('womens') || lowerTitle.includes('mens')) {
+      } else if (lowerTitle.includes('boot') || lowerTitle.includes('shoe') || lowerTitle.includes('snow boots') || lowerTitle.includes('womens') || lowerTitle.includes('mens') || lowerTitle.includes('jacket') || lowerTitle.includes('apparel') || lowerTitle.includes('claw clip')) {
         item.category = 'apparel';
-      } else if (lowerTitle.includes('drill') || lowerTitle.includes('saw') || lowerTitle.includes('impact') || lowerTitle.includes('dewalt') || lowerTitle.includes('milwaukee') || lowerTitle.includes('tool') || lowerTitle.includes('hardware')) {
-        item.category = 'tools';
-      } else if (lowerTitle.includes('coffee') || lowerTitle.includes('espresso') || lowerTitle.includes('blender') || lowerTitle.includes('fryer') || lowerTitle.includes('vacuum') || lowerTitle.includes('microwave') || lowerTitle.includes('kitchen')) {
+      } else if (lowerTitle.includes('coffee') || lowerTitle.includes('espresso') || lowerTitle.includes('blender') || lowerTitle.includes('fryer') || lowerTitle.includes('vacuum') || lowerTitle.includes('microwave') || lowerTitle.includes('kitchen') || lowerTitle.includes('appliance')) {
         item.category = 'appliances';
-      } else if (lowerTitle.includes('ottoman') || lowerTitle.includes('chair') || lowerTitle.includes('desk') || lowerTitle.includes('table') || lowerTitle.includes('furniture')) {
+      } else if (lowerTitle.includes('ottoman') || lowerTitle.includes('chair') || lowerTitle.includes('desk') || lowerTitle.includes('table') || lowerTitle.includes('furniture') || lowerTitle.includes('standing desk')) {
         item.category = 'furniture';
       } else if (lowerTitle.includes('pallet') || lowerTitle.includes('skid') || lowerTitle.includes('wholesale')) {
         item.category = 'pallets';
-      } else if (lowerTitle.includes('outdoor') || lowerTitle.includes('patio') || lowerTitle.includes('tent') || lowerTitle.includes('scooter') || lowerTitle.includes('sports')) {
+      } else if (lowerTitle.includes('outdoor') || lowerTitle.includes('patio') || lowerTitle.includes('tent') || lowerTitle.includes('scooter') || lowerTitle.includes('sports') || lowerTitle.includes('power station') || lowerTitle.includes('ecoflow')) {
         item.category = 'outdoor';
-      } else if (lowerTitle.includes('macbook') || lowerTitle.includes('laptop') || lowerTitle.includes('headphones') || lowerTitle.includes('earbuds') || lowerTitle.includes('tv') || lowerTitle.includes('display') || lowerTitle.includes('smartwatch')) {
+      } else if (lowerTitle.includes('macbook') || lowerTitle.includes('laptop') || lowerTitle.includes('headphones') || lowerTitle.includes('earbuds') || lowerTitle.includes('tv') || lowerTitle.includes('display') || lowerTitle.includes('smartwatch') || lowerTitle.includes('oled') || lowerTitle.includes('ipad') || lowerTitle.includes('monitor')) {
         item.category = 'electronics';
       }
 

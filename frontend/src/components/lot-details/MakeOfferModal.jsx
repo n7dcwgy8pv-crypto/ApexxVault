@@ -287,8 +287,8 @@ export const MakeOfferModal = ({ product, isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Offer Input Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.85rem', marginBottom: '1.25rem' }}>
+          {/* Offer Input Row (Finding M4: Stack on mobile) */}
+          <div className="modal-responsive-grid-row" style={{ marginBottom: '1.25rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
                 Your Proposed Price (CAD) *
@@ -328,7 +328,7 @@ export const MakeOfferModal = ({ product, isOpen, onClose }) => {
           </div>
 
           {/* Contact Fields */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
+          <div className="modal-responsive-grid-row" style={{ marginBottom: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
                 Full Name *

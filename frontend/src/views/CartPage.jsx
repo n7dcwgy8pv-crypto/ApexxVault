@@ -16,8 +16,9 @@ import { formatCurrency } from '../utils/formatters';
 export const CartPage = () => {
   const {
     cart,
-    updateCartItemQuantity,
+    updateCartQuantity,
     removeFromCart,
+    clearCart,
     cartTotals,
     cartHoldCountdown
   } = useAuction();
@@ -36,7 +37,7 @@ export const CartPage = () => {
         <ShoppingCart size={64} color="var(--ink-muted)" style={{ margin: '0 auto 1.5rem' }} />
         <h1 style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>Your Cart is Empty</h1>
         <p style={{ color: 'var(--ink-muted)', marginBottom: '1.75rem' }}>
-          Explore our Scarborough warehouse surplus catalogue and find liquidation deals up to 90% off.
+          Explore our Scarborough warehouse surplus catalogue and find liquidation deals up to 75% off.
         </p>
         <Link to="/collections/all" className="btn-primary" style={{ padding: '0.85rem 2rem' }}>
           Shop All Inventory
@@ -126,21 +127,32 @@ export const CartPage = () => {
                         </div>
                       </div>
 
-                      {/* Quantity Controls */}
+                      {/* Quantity Controls (Finding C7 & M2) */}
                       <div className="cart-item-qty-cell">
                         <div className="cart-qty-counter">
                           <button
                             type="button"
-                            onClick={() => updateCartItemQuantity(prodId, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
+                            className="qty-touch-btn"
+                            onClick={() => {
+                              if (item.quantity > 1) {
+                                updateCartQuantity(prodId, item.quantity - 1);
+                              } else {
+                                removeFromCart(prodId);
+                              }
+                            }}
+                            title="Decrease quantity"
+                            aria-label="Decrease quantity"
                           >
                             -
                           </button>
-                          <span>{item.quantity}</span>
+                          <span className="qty-value-display">{item.quantity}</span>
                           <button
                             type="button"
-                            onClick={() => updateCartItemQuantity(prodId, item.quantity + 1)}
+                            className="qty-touch-btn"
+                            onClick={() => updateCartQuantity(prodId, item.quantity + 1)}
                             disabled={item.quantity >= (product.stockQty || 5)}
+                            title="Increase quantity"
+                            aria-label="Increase quantity"
                           >
                             +
                           </button>

@@ -11,17 +11,20 @@ export const SearchPage = () => {
 
   const searchQuery = (queryParams.get('q') || '').trim();
 
-  // Search logic
+  // Search logic (Finding C2)
   const searchResults = useMemo(() => {
     if (!searchQuery) return [];
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
     return products.filter((p) => {
+      if (!p) return false;
       const titleMatch = (p.title || '').toLowerCase().includes(query);
       const brandMatch = (p.brand || '').toLowerCase().includes(query);
       const skuMatch = (p.sku || '').toLowerCase().includes(query);
+      const modelMatch = (p.modelNumber || '').toLowerCase().includes(query);
       const catMatch = (p.category || '').toLowerCase().includes(query);
       const descMatch = (p.description || '').toLowerCase().includes(query);
-      return titleMatch || brandMatch || skuMatch || catMatch || descMatch;
+      const tagMatch = Array.isArray(p.tags) && p.tags.some(t => (t || '').toLowerCase().includes(query));
+      return titleMatch || brandMatch || skuMatch || modelMatch || catMatch || descMatch || tagMatch;
     });
   }, [products, searchQuery]);
 
@@ -41,7 +44,9 @@ export const SearchPage = () => {
             Search Results for: <span className="search-query-highlight">"{searchQuery}"</span>
           </h1>
           <p className="search-results-count">
-            Found {searchResults.length} asset{searchResults.length === 1 ? '' : 's'} matching your search.
+            {isLoadingProducts
+              ? 'Searching verified inventory...'
+              : `Found ${searchResults.length} asset${searchResults.length === 1 ? '' : 's'} matching your search.`}
           </p>
         </div>
 

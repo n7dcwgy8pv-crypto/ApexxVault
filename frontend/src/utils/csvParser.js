@@ -86,37 +86,43 @@ export const cleanProductTitle = (rawTitle) => {
 export const normalizeCategory = (rawCat, rawTitle = '') => {
   const combined = `${rawCat || ''} ${rawTitle || ''}`.toLowerCase();
 
+  // 1. Tools & Hardware prioritized over 'brushless' substring
+  if (
+    combined.includes('dewalt') || combined.includes('milwaukee') || combined.includes('drill') ||
+    combined.includes('impact') || combined.includes('saw') || combined.includes('miter') ||
+    combined.includes('tool') || combined.includes('hardw') || combined.includes('bosch') ||
+    combined.includes('makita') || combined.includes('wrench')
+  ) {
+    return 'tools';
+  }
   if (
     combined.includes('wash') || combined.includes('soap') || combined.includes('wipe') ||
-    combined.includes('castor') || combined.includes('oil') || combined.includes('razor') ||
-    combined.includes('pad') || combined.includes('beauty') || combined.includes('lotion') ||
-    combined.includes('glotion') || combined.includes('cocoa butter') || combined.includes('brush') ||
-    combined.includes('glycolic') || combined.includes('clip')
+    combined.includes('castor') || combined.includes('razor') || combined.includes('pad') ||
+    combined.includes('beauty') || combined.includes('lotion') || combined.includes('glotion') ||
+    combined.includes('cocoa butter') || (combined.includes('brush') && !combined.includes('brushless')) ||
+    combined.includes('glycolic') || combined.includes('sonicare') || combined.includes('oral-b')
   ) {
     return 'health_beauty';
   }
   if (combined.includes('dog') || combined.includes('cat') || combined.includes('muzzle') || combined.includes('pet')) {
     return 'pets';
   }
-  if (combined.includes('boot') || combined.includes('shoe') || combined.includes('snow') || combined.includes('apparel') || combined.includes('jacket')) {
+  if (combined.includes('boot') || combined.includes('shoe') || combined.includes('snow') || combined.includes('apparel') || combined.includes('jacket') || combined.includes('claw clip') || combined.includes('hair clip')) {
     return 'apparel';
   }
-  if (combined.includes('tool') || combined.includes('hardw') || combined.includes('drill') || combined.includes('saw') || combined.includes('impact') || combined.includes('dewalt') || combined.includes('milwaukee')) {
-    return 'tools';
-  }
-  if (combined.includes('appliance') || combined.includes('kitchen') || combined.includes('vacuum') || combined.includes('cook') || combined.includes('coffee') || combined.includes('espresso') || combined.includes('fryer')) {
+  if (combined.includes('appliance') || combined.includes('kitchen') || combined.includes('vacuum') || combined.includes('cook') || combined.includes('coffee') || combined.includes('espresso') || combined.includes('fryer') || combined.includes('dyson') || combined.includes('ninja') || combined.includes('breville')) {
     return 'appliances';
   }
   if (combined.includes('pallet') || combined.includes('bulk') || combined.includes('skid') || combined.includes('wholesale') || combined.includes('gaylord')) {
     return 'pallets';
   }
-  if (combined.includes('outdoor') || combined.includes('sport') || combined.includes('patio') || combined.includes('garden') || combined.includes('scooter') || combined.includes('tent')) {
+  if (combined.includes('outdoor') || combined.includes('sport') || combined.includes('patio') || combined.includes('garden') || combined.includes('scooter') || combined.includes('tent') || combined.includes('ecoflow') || combined.includes('power station')) {
     return 'outdoor';
   }
-  if (combined.includes('furn') || combined.includes('chair') || combined.includes('table') || combined.includes('desk') || combined.includes('ottoman') || combined.includes('home')) {
+  if (combined.includes('furn') || combined.includes('chair') || combined.includes('table') || combined.includes('desk') || combined.includes('ottoman') || combined.includes('aeron') || combined.includes('steelcase')) {
     return 'furniture';
   }
-  if (combined.includes('elect') || combined.includes('tech') || combined.includes('comput') || combined.includes('phone') || combined.includes('tv') || combined.includes('audio') || combined.includes('laptop') || combined.includes('headphone')) {
+  if (combined.includes('elect') || combined.includes('tech') || combined.includes('comput') || combined.includes('phone') || combined.includes('tv') || combined.includes('audio') || combined.includes('laptop') || combined.includes('headphone') || combined.includes('ipad') || combined.includes('samsung') || combined.includes('sony') || combined.includes('oled')) {
     return 'electronics';
   }
   return 'electronics';

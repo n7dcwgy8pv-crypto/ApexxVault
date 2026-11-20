@@ -28,6 +28,7 @@ export const HomePage = () => {
   const {
     products,
     isLoadingProducts,
+    categoryCounts,
     addToCart,
     openMakeOffer,
     catalogStats
@@ -72,58 +73,68 @@ export const HomePage = () => {
     'Timberland PRO'
   ];
 
+  // Featured Hero product (DeWalt Kit - Finding H1 & H2)
+  const heroProduct = products.find(p => p.sku === 'SKU-DW-201') || products.find(p => p.category === 'tools') || products[0] || null;
+
   // Pick Deal of the Day product (e.g. Dyson or first product with highest discount)
   const dealOfTheDay = products.find(p => p.sku === 'SKU-DY-515') || products[0] || null;
 
-  // Pick Deal of the Week (e.g. Herman Miller Aeron or DeWalt kit)
-  const dealOfTheWeek = products.find(p => p.sku === 'SKU-HM-8802') || products[1] || null;
+  // Pick Deal of the Week (e.g. Herman Miller Aeron or Steelcase)
+  const dealOfTheWeek = products.find(p => p.sku === 'SKU-HM-8802') || products.find(p => p.category === 'furniture') || products[1] || null;
 
   // This Week's Drops (8 items)
   const drops = products.slice(0, 8);
 
-  // Category counts and images mapping
+  // Category counts and images mapping (Single Source of Truth - Finding C4 & P5)
   const categoryCards = [
     {
       id: 'tools',
       title: 'Power Tools & Hardware',
       subtitle: 'Contractor sets, drills, saws & toolboxes',
       image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600',
-      count: products.filter(p => p.category === 'tools').length || 24
+      count: categoryCounts ? (categoryCounts['tools'] ?? 0) : 0
     },
     {
       id: 'electronics',
       title: 'Consumer Electronics',
       subtitle: 'OLED displays, headphones, iPads & audio',
       image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600',
-      count: products.filter(p => p.category === 'electronics').length || 32
+      count: categoryCounts ? (categoryCounts['electronics'] ?? 0) : 0
     },
     {
       id: 'appliances',
       title: 'Kitchen & Home Appliances',
       subtitle: 'Air fryers, robot vacuums & blenders',
       image: 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=600',
-      count: products.filter(p => p.category === 'appliances').length || 18
+      count: categoryCounts ? (categoryCounts['appliances'] ?? 0) : 0
     },
     {
       id: 'furniture',
       title: 'Office & Living Furniture',
       subtitle: 'Ergonomic chairs, desks & storage',
-      image: 'https://images.unsplash.com/photo-1580481077195-cabb094ef400?w=600',
-      count: products.filter(p => p.category === 'furniture').length || 10
+      image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600',
+      count: categoryCounts ? (categoryCounts['furniture'] ?? 0) : 0
     },
     {
       id: 'health_beauty',
       title: 'Health, Beauty & Personal Care',
       subtitle: 'Sonic toothbrushes, groomers & wellness',
-      image: 'https://images.unsplash.com/photo-1559591937-e102202b21a8?w=600',
-      count: products.filter(p => p.category === 'health_beauty').length || 22
+      image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600',
+      count: categoryCounts ? (categoryCounts['health_beauty'] ?? 0) : 0
+    },
+    {
+      id: 'pets',
+      title: 'Pet Supplies & Cameras',
+      subtitle: 'Grooming gloves, toys & treat cams',
+      image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600',
+      count: categoryCounts ? (categoryCounts['pets'] ?? 0) : 0
     },
     {
       id: 'pallets',
       title: 'Wholesale & Mystery Pallets',
       subtitle: 'Bulk tier-1 overstock manifests for resellers',
       image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600',
-      count: products.filter(p => p.category === 'pallets').length || 6
+      count: categoryCounts ? (categoryCounts['pallets'] ?? 0) : 0
     }
   ];
 
@@ -166,7 +177,7 @@ export const HomePage = () => {
               </h1>
 
               <p className="home-hero-subtitle">
-                Save up to 90% on authentic overstock, returns, and surplus inventory. Inspected, tested, and ready for fast delivery or Scarborough warehouse pickup.
+                Save up to 75% on authentic overstock, returns, and surplus inventory. Inspected, tested, and ready for fast delivery or Scarborough warehouse pickup.
               </p>
 
               <div className="home-hero-cta-group">
@@ -183,8 +194,8 @@ export const HomePage = () => {
                   type="button"
                   className="btn-secondary hero-cta-btn"
                   onClick={() => {
-                    if (dealOfTheWeek) {
-                      openMakeOffer(dealOfTheWeek);
+                    if (heroProduct) {
+                      openMakeOffer(heroProduct);
                     } else {
                       navigate('/collections/all');
                     }
@@ -203,7 +214,7 @@ export const HomePage = () => {
                 </div>
                 <div className="hero-stat-divider" />
                 <div className="hero-stat-item">
-                  <strong>Up to 90%</strong>
+                  <strong>Up to 75%</strong>
                   <span>Below Retail MSRP</span>
                 </div>
                 <div className="hero-stat-divider" />
@@ -221,22 +232,28 @@ export const HomePage = () => {
 
             {/* Hero Visual Block */}
             <div className="home-hero-visual">
-              <div className="hero-card-featured">
+              <div
+                className="hero-card-featured"
+                onClick={() => heroProduct && navigate(`/products/${heroProduct.id || heroProduct._id}`)}
+                style={{ cursor: 'pointer' }}
+                role="button"
+                tabIndex={0}
+              >
                 <div className="hero-card-badge">Featured Surplus Lot</div>
                 <img
-                  src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=900"
-                  alt="DeWalt Overstock Kit"
+                  src={heroProduct?.images?.[0] || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=900'}
+                  alt={heroProduct?.title || 'DeWalt Overstock Kit'}
                   className="hero-featured-img"
                 />
                 <div className="hero-featured-overlay">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="hero-lot-title">DeWalt 20V Max Brushless Kit</span>
-                      <p className="hero-lot-desc">Factory Sealed • Retail MSRP $299.99</p>
+                      <span className="hero-lot-title">{heroProduct?.title || 'DeWalt 20V Max Brushless Kit'}</span>
+                      <p className="hero-lot-desc">{heroProduct?.condition || 'Factory Sealed'} • Retail MSRP {formatCurrency(heroProduct?.retailMSRP || 299.99)}</p>
                     </div>
                     <div className="hero-lot-price-tag">
-                      <span className="hero-price">$169.99</span>
-                      <span className="hero-savings">SAVE 43%</span>
+                      <span className="hero-price">{formatCurrency(heroProduct?.price || 169.99)}</span>
+                      <span className="hero-savings">SAVE {formatPercentOff(heroProduct?.price || 169.99, heroProduct?.retailMSRP || 299.99)}%</span>
                     </div>
                   </div>
                 </div>
@@ -466,7 +483,7 @@ export const HomePage = () => {
               <div className="deal-week-content-grid">
                 <div className="deal-week-image-wrap">
                   <img
-                    src={dealOfTheWeek.images?.[0] || 'https://images.unsplash.com/photo-1580481077195-cabb094ef400?w=800'}
+                    src={dealOfTheWeek.images?.[0] || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'}
                     alt={dealOfTheWeek.title}
                     className="deal-week-image"
                   />
@@ -484,7 +501,7 @@ export const HomePage = () => {
                   <h3 className="deal-week-title">{dealOfTheWeek.title}</h3>
                   <p className="deal-week-description">
                     {dealOfTheWeek.description ||
-                      'Corporate tech office surplus. Fully functional ergonomic posture support. Inspected and verified in pristine condition at our Scarborough depot.'}
+                      `${dealOfTheWeek.title} — Verified tier-1 retail overstock surplus inspected and tested at our Scarborough depot.`}
                   </p>
 
                   <div className="deal-week-pricing-box">
@@ -559,7 +576,7 @@ export const HomePage = () => {
               <div className="how-step-number">01</div>
               <h3 className="how-step-title">Find the Deal</h3>
               <p className="how-step-desc">
-                Browse certified retail overstock, tech surplus, contractor tools, and wholesale pallets at up to 90% below retail MSRP.
+                Browse certified retail overstock, tech surplus, contractor tools, and wholesale pallets at up to 75% below retail MSRP.
               </p>
             </div>
 

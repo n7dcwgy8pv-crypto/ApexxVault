@@ -6,7 +6,7 @@ import { CATEGORIES } from '../data/auctionEvents';
 
 export const CategoriesPage = () => {
   const { navigate } = useRouter();
-  const { products, setIsDropAlertOpen } = useAuction();
+  const { products, categoryCounts, setIsDropAlertOpen } = useAuction();
 
   const categoryDetails = [
     {
@@ -14,56 +14,63 @@ export const CategoriesPage = () => {
       name: 'Power Tools & Hardware',
       description: 'Contractor drills, impact drivers, table saws, combo toolkits & accessories from DeWalt, Milwaukee, Makita & Bosch.',
       image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=700',
-      count: products.filter(p => p.category === 'tools').length || 24
+      count: categoryCounts ? (categoryCounts['tools'] ?? 0) : 0
     },
     {
       id: 'electronics',
       name: 'Consumer Electronics & Audio',
       description: 'OLED tablets, noise-canceling headphones, smart monitors, laptops & gaming gear from Apple, Sony, Samsung & Dyson.',
       image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700',
-      count: products.filter(p => p.category === 'electronics').length || 32
+      count: categoryCounts ? (categoryCounts['electronics'] ?? 0) : 0
     },
     {
       id: 'appliances',
       name: 'Kitchen & Home Appliances',
       description: 'Air fryers, multicookers, robot vacuums, blenders & coffee machines from Ninja, Dyson, Instant Pot & Philips.',
       image: 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=700',
-      count: products.filter(p => p.category === 'appliances').length || 18
+      count: categoryCounts ? (categoryCounts['appliances'] ?? 0) : 0
     },
     {
       id: 'furniture',
       name: 'Ergonomic Office & Living',
       description: 'Pellicle mesh chairs, motorized standing desks, storage cabinets & commercial office surplus from Herman Miller & Steelcase.',
-      image: 'https://images.unsplash.com/photo-1580481077195-cabb094ef400?w=700',
-      count: products.filter(p => p.category === 'furniture').length || 10
+      image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=700',
+      count: categoryCounts ? (categoryCounts['furniture'] ?? 0) : 0
     },
     {
       id: 'health_beauty',
       name: 'Health, Beauty & Personal Care',
       description: 'Sonic pressure toothbrushes, grooming equipment, wellness kits & personal care surplus from Oral-B & Philips Sonicare.',
-      image: 'https://images.unsplash.com/photo-1559591937-e102202b21a8?w=700',
-      count: products.filter(p => p.category === 'health_beauty').length || 22
+      image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=700',
+      count: categoryCounts ? (categoryCounts['health_beauty'] ?? 0) : 0
+    },
+    {
+      id: 'pets',
+      name: 'Pet Supplies & Smart Cameras',
+      description: 'Deshedding gloves, enrichment toys, smart treat-tossing cameras & grooming tools for dogs and cats.',
+      image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=700',
+      count: categoryCounts ? (categoryCounts['pets'] ?? 0) : 0
     },
     {
       id: 'pallets',
       name: 'Wholesale & Mystery Pallets',
       description: 'Full shrink-wrapped liquidation pallets, electronics overstock lots & manifests for eBay/Amazon resellers and stores.',
       image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=700',
-      count: products.filter(p => p.category === 'pallets').length || 6
+      count: categoryCounts ? (categoryCounts['pallets'] ?? 0) : 0
     },
     {
       id: 'apparel',
       name: 'Apparel & Workwear Footwear',
       description: 'CSA safety work boots, contractor jackets, outdoor apparel & footwear surplus from Timberland PRO, Carhartt & Nike.',
       image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700',
-      count: products.filter(p => p.category === 'apparel').length || 8
+      count: categoryCounts ? (categoryCounts['apparel'] ?? 0) : 0
     },
     {
       id: 'outdoor',
       name: 'Sports, Patio & Outdoor',
       description: 'Heavy camping gear, portable power stations, patio heaters & sports surplus from top outdoor brands.',
       image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=700',
-      count: products.filter(p => p.category === 'outdoor').length || 9
+      count: categoryCounts ? (categoryCounts['outdoor'] ?? 0) : 0
     }
   ];
 

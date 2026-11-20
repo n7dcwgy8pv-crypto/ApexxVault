@@ -44,7 +44,7 @@ export const AboutUsPage = () => {
             Every week, major Canadian and North American big-box retailers, corporate enterprises, and distribution centers liquidate pristine overstock inventory to make room for new seasonal shipments. Traditionally, these premium goods were locked behind private broker networks or unpredictable auction rooms with hidden buyer premiums.
           </p>
           <p>
-            ApexxVault secures high-volume master contracts directly from tier-1 distribution hubs. We bring these assets straight to our Scarborough warehouse at <strong>705 Progress Ave #32</strong>, test and verify every lot individually, and pass the savings (up to 90% below retail MSRP) directly to Canadian consumers, contractors, and independent resellers.
+            ApexxVault secures high-volume master contracts directly from tier-1 distribution hubs. We bring these assets straight to our Scarborough warehouse at <strong>705 Progress Ave #32</strong>, test and verify every lot individually, and pass the savings (up to 75% below retail MSRP) directly to Canadian consumers, contractors, and independent resellers.
           </p>
 
           <div className="about-pillars-grid">

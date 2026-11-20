@@ -413,7 +413,7 @@ export const AccountPage = () => {
               <div className="account-empty-box">
                 <PackageCheck size={48} color="var(--ink-muted)" />
                 <h3>No Orders Placed Yet</h3>
-                <p>Browse our catalog to score liquidation deals up to 90% below MSRP.</p>
+                <p>Browse our catalog to score liquidation deals up to 75% below MSRP.</p>
                 <Link to="/collections/all" className="btn-primary" style={{ marginTop: '1rem' }}>
                   Explore Catalogue
                 </Link>

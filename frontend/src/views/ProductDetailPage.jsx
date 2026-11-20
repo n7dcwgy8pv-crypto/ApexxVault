@@ -28,6 +28,8 @@ import { useNotification } from '../context/NotificationContext';
 export const ProductDetailPage = ({ productId = null }) => {
   const {
     products,
+    cart,
+    cartHoldCountdown,
     addToCart,
     openMakeOffer,
     triggerHoldProduct,
@@ -113,6 +115,13 @@ export const ProductDetailPage = ({ productId = null }) => {
   }
 
   const isWatched = watchlist.includes(prodId);
+
+  const isItemInCart = useMemo(() => {
+    return (cart || []).some(item => {
+      const p = item.product || item;
+      return (p.id === prodId || p._id === prodId || (product && p.sku === product.sku));
+    });
+  }, [cart, prodId, product]);
   const savingsPct = formatPercentOff(product.price, product.retailMSRP);
   const dollarSavings = Math.max(0, (product.retailMSRP || 0) - (product.price || 0));
   const isOutOfStock = product.stockQty <= 0;
@@ -425,10 +434,18 @@ export const ProductDetailPage = ({ productId = null }) => {
                     <span>{copiedLink ? 'Copied' : 'Share'}</span>
                   </button>
                 </div>
+
+                {/* Live Cart Hold Alert (Finding H4) */}
+                {isItemInCart && (
+                  <div className="pdp-cart-hold-banner" style={{ background: 'rgba(212, 160, 23, 0.12)', border: '1px solid rgba(212, 160, 23, 0.4)', borderRadius: '6px', padding: '0.65rem 0.85rem', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: 'var(--accent-gold)' }}>
+                    <Clock size={16} />
+                    <span>Reserved in your cart: <strong>{cartHoldCountdown || '29:50'}</strong> hold remaining.</span>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Description & Condition Notes */}
+            {/* Description & Condition Notes (Finding H4: Structured Inspection Sections) */}
             <div className="pdp-details-tabs">
               <h3 className="pdp-section-heading">Asset Specifications &amp; Notes</h3>
               <p className="pdp-description-text">
@@ -436,8 +453,25 @@ export const ProductDetailPage = ({ productId = null }) => {
               </p>
 
               {product.conditionNotes && (
-                <div className="pdp-condition-notes-box">
-                  <strong>Grading Notes:</strong> {product.conditionNotes}
+                <div className="pdp-inspection-card">
+                  <div className="pdp-inspection-header">
+                    <ShieldCheck size={18} color="var(--accent-gold)" />
+                    <h4>Scarborough Depot Technical Inspection</h4>
+                  </div>
+                  <div className="pdp-inspection-table">
+                    <div className="inspection-row">
+                      <span className="inspection-label">Condition Grade</span>
+                      <span className="inspection-value font-bold">{product.condition}</span>
+                    </div>
+                    <div className="inspection-row">
+                      <span className="inspection-label">Testing Status</span>
+                      <span className="inspection-value text-emerald">100% Bench Tested &amp; Serial Verified</span>
+                    </div>
+                    <div className="inspection-row">
+                      <span className="inspection-label">Inspector Notes</span>
+                      <span className="inspection-value">{product.conditionNotes}</span>
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -94,7 +94,7 @@ export const Navbar = () => {
             <Search size={16} className="search-icon-inside" />
             <input
               type="text"
-              placeholder="Search tools, laptops, appliances..."
+              placeholder="Search lots..."
               value={searchInputValue}
               onChange={(e) => setSearchInputValue(e.target.value)}
               className="search-input"
@@ -126,7 +126,7 @@ export const Navbar = () => {
           </button>
 
           {/* Admin Management Button (Only visible to authenticated administrators) */}
-          {isAdmin && (
+          {isLoggedIn && isAdmin && (
             <Link
               to="/admin"
               className="header-action-btn admin-portal-btn"
@@ -191,7 +191,7 @@ export const Navbar = () => {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Search overstock & liquidation lots..."
+              placeholder="Search lots..."
               value={searchInputValue}
               onChange={(e) => setSearchInputValue(e.target.value)}
               autoFocus

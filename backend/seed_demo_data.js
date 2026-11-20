@@ -220,7 +220,7 @@ async function seed() {
       warehouseLocation: 'Bay E-01',
       barcode: '700123984512',
       images: [
-        'https://images.unsplash.com/photo-1580481077195-cabb094ef400?w=800'
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'
       ],
       description: 'Pellicle 8Z breathable suspension seat and back creates eight zones of varying tension for optimal spinal support.',
       supplier: 'Downtown Toronto Corporate Liquidation'
@@ -260,10 +260,130 @@ async function seed() {
       warehouseLocation: 'Bay D-01',
       barcode: '069055883011',
       images: [
-        'https://images.unsplash.com/photo-1559591937-e102202b21a8?w=800'
+        'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800'
       ],
       description: 'Revolutionary magnetic iO technology combines micro-vibrating bristles with dentist-inspired round brush head.',
       supplier: 'Shoppers Drug Mart Wholesale Lot'
+    },
+    {
+      title: 'Method Gel Hand Wash Refill Sweet Water 34oz',
+      brand: 'Method',
+      modelNumber: 'MTH-SW-34',
+      sku: 'SKU-MT-340',
+      category: 'health_beauty',
+      condition: 'Brand New',
+      conditionNotes: 'Factory sealed pouch. Naturally derived gel hand wash refill. PETA certified cruelty-free.',
+      price: 8.99,
+      retailMSRP: 16.99,
+      costPrice: 3.5,
+      stockQty: 12,
+      warehouseLocation: 'Bay D-05',
+      barcode: '817939005432',
+      images: [
+        'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800'
+      ],
+      description: 'Biodegradable formula made with plant-based cleaners. Leaves hands clean, soft, and scented with cool sweet water.',
+      supplier: 'Target Surplus Personal Care'
+    },
+    {
+      title: 'Paula\'s Choice 2% BHA Liquid Exfoliant & Glycolic Resurfacing Pads',
+      brand: 'Paula\'s Choice',
+      modelNumber: 'PC-BHA-118',
+      sku: 'SKU-PC-118',
+      category: 'health_beauty',
+      condition: 'Brand New',
+      conditionNotes: 'Factory sealed safety wrap. Unclogs & diminishes enlarged pores, smooths wrinkles, and evens skin tone.',
+      price: 24.99,
+      retailMSRP: 48.0,
+      costPrice: 11.0,
+      stockQty: 6,
+      warehouseLocation: 'Bay D-06',
+      barcode: '655439002014',
+      images: [
+        'https://images.unsplash.com/photo-1576426863848-c21f53c60b19?w=800'
+      ],
+      description: 'Gentle, leave-on exfoliant that unclogs pores, clears breakouts, and brightens dull skin texture without abrasives.',
+      supplier: 'Sephora Shelf Pull Liquidation'
+    },
+    {
+      title: 'French Hair Claw Clip Non-Slip Strong Hold 4-Pack',
+      brand: 'ApexxVault Apparel',
+      modelNumber: 'HC-CLAW-04',
+      sku: 'SKU-HC-404',
+      category: 'apparel',
+      condition: 'Brand New',
+      conditionNotes: 'Brand new in package. Matte finish strong-spring non-slip claw clips for all hair types.',
+      price: 9.99,
+      retailMSRP: 22.0,
+      costPrice: 2.8,
+      stockQty: 15,
+      warehouseLocation: 'Bay D-07',
+      barcode: '741258963012',
+      images: [
+        'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800'
+      ],
+      description: 'Durable acrylic resin with soft rubberized coating. Powerful interlocking teeth hold thick or fine hair securely in place.',
+      supplier: 'Nordstrom Overstock Lot'
+    },
+    {
+      title: 'Pet Grooming Deshedding Glove & Gentle Brush Set',
+      brand: 'ApexxVault Pets',
+      modelNumber: 'PET-GLV-02',
+      sku: 'SKU-PET-201',
+      category: 'pets',
+      condition: 'Brand New',
+      conditionNotes: 'Factory sealed package. Includes 1 pair breathable silicone grooming gloves and double-sided pin/bristle brush.',
+      price: 12.99,
+      retailMSRP: 28.0,
+      costPrice: 4.0,
+      stockQty: 8,
+      warehouseLocation: 'Bay G-01',
+      barcode: '852963741012',
+      images: [
+        'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800'
+      ],
+      description: '255 enhanced silicone grooming tips mimic the gentle touch of your hand for a relaxing massage while capturing loose shedding hair.',
+      supplier: 'Petco Surplus Inventory'
+    },
+    {
+      title: 'Furbo 360° Smart Dog Camera with Treat Tossing & Two-Way Audio',
+      brand: 'Furbo',
+      modelNumber: 'F360-WHT',
+      sku: 'SKU-FB-360',
+      category: 'pets',
+      condition: 'Appears New',
+      conditionNotes: 'Open box return verified at Scarborough depot. Full rotating 360 view, night vision, and Wi-Fi tested.',
+      price: 119.99,
+      retailMSRP: 249.0,
+      costPrice: 55.0,
+      stockQty: 2,
+      warehouseLocation: 'Bay G-02',
+      barcode: '850014234012',
+      images: [
+        'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800'
+      ],
+      description: '360-degree rotating wide-angle view in full 1080p HD. Toss treats to your dog remotely via free phone app with real-time barking alerts.',
+      supplier: 'Amazon Return Tech Pallet'
+    },
+    {
+      title: 'Coleman Sundome 4-Person WeatherTec Camping Tent',
+      brand: 'Coleman',
+      modelNumber: '2000024582',
+      sku: 'SKU-CL-400',
+      category: 'outdoor',
+      condition: 'Brand New',
+      conditionNotes: 'Factory sealed storage carry bag. WeatherTec system with patented welded floors and inverted seams.',
+      price: 69.99,
+      retailMSRP: 139.99,
+      costPrice: 32.0,
+      stockQty: 3,
+      warehouseLocation: 'Bay F-02',
+      barcode: '076501064012',
+      images: [
+        'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800'
+      ],
+      description: 'Quick 10-minute setup with snag-free continuous pole sleeves. Ground vent and large windows push warm air up and out for comfort.',
+      supplier: 'Canadian Tire Outdoor Liquidation'
     },
     {
       title: 'Timberland PRO Men 6-Inch Pit Boss Steel Toe Work Boots Size 10.5',
@@ -373,7 +493,7 @@ async function seed() {
       stockQty: 2,
       warehouseLocation: 'Bay E-02',
       barcode: '792014882012',
-      images: ['https://images.unsplash.com/photo-1580481077195-cabb094ef400?w=800'],
+      images: ['https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800'],
       description: 'Designed to support user interaction with today smartphone, tablet, and multi-monitor setups. Core Equalizer lumbar support.',
       supplier: 'Commercial Tech Surplus Toronto'
     },
@@ -391,7 +511,7 @@ async function seed() {
       stockQty: 4,
       warehouseLocation: 'Bay D-02',
       barcode: '075020088019',
-      images: ['https://images.unsplash.com/photo-1559591937-e102202b21a8?w=800'],
+      images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800'],
       description: 'Removes up to 10x more plaque than a manual toothbrush. Built-in pressure sensor alerts you when brushing too hard.',
       supplier: 'Costco Wholesale Canada Overstock'
     },

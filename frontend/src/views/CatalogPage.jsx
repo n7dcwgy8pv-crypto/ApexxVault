@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Filter,
   SlidersHorizontal,
@@ -19,6 +19,7 @@ export const CatalogPage = ({ categorySlug = null }) => {
   const {
     products,
     isLoadingProducts,
+    categoryCounts,
     selectedCategory,
     setSelectedCategory,
     selectedConditions,
@@ -33,6 +34,15 @@ export const CatalogPage = ({ categorySlug = null }) => {
 
   const { navigate } = useRouter();
 
+  // Sync route category with context state (Finding C3)
+  useEffect(() => {
+    if (categorySlug) {
+      setSelectedCategory(categorySlug);
+    } else {
+      setSelectedCategory('all');
+    }
+  }, [categorySlug, setSelectedCategory]);
+
   // Local filter states for sidebar
   const activeCategory = categorySlug || selectedCategory || 'all';
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -42,8 +52,7 @@ export const CatalogPage = ({ categorySlug = null }) => {
 
   const currentCategoryObj = CATEGORIES.find(c => c.id === activeCategory) || {
     id: 'all',
-    name: 'All Inventory',
-    count: products.length
+    name: 'All Inventory'
   };
 
   // Filtered and sorted products
@@ -149,7 +158,9 @@ export const CatalogPage = ({ categorySlug = null }) => {
           <div>
             <h1 className="catalog-main-title">{currentCategoryObj.name}</h1>
             <p className="catalog-subtitle">
-              Showing {filteredProducts.length} verified liquidation lot{filteredProducts.length === 1 ? '' : 's'} ready for pickup or delivery from Scarborough Depot.
+              {isLoadingProducts
+                ? 'Loading ApexxVault surplus inventory...'
+                : `Showing ${filteredProducts.length} verified liquidation lot${filteredProducts.length === 1 ? '' : 's'} ready for pickup or delivery from Scarborough Depot.`}
             </p>
           </div>
 
@@ -175,7 +186,13 @@ export const CatalogPage = ({ categorySlug = null }) => {
             </button>
 
             <span className="toolbar-count">
-              <strong>{filteredProducts.length}</strong> Products
+              {isLoadingProducts ? (
+                <span>Loading lots...</span>
+              ) : (
+                <>
+                  <strong>{filteredProducts.length}</strong> Product{filteredProducts.length === 1 ? '' : 's'}
+                </>
+              )}
             </span>
           </div>
 
@@ -209,6 +226,7 @@ export const CatalogPage = ({ categorySlug = null }) => {
               <ul className="category-filter-list">
                 {CATEGORIES.map((cat) => {
                   const isCurrent = activeCategory === cat.id;
+                  const catCount = categoryCounts ? (categoryCounts[cat.id] ?? 0) : 0;
                   return (
                     <li key={cat.id}>
                       <button
@@ -224,7 +242,7 @@ export const CatalogPage = ({ categorySlug = null }) => {
                         }}
                       >
                         <span>{cat.name}</span>
-                        {cat.count && <span className="cat-count">{cat.count}</span>}
+                        <span className="cat-count">{catCount}</span>
                       </button>
                     </li>
                   );

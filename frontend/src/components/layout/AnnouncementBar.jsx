@@ -6,7 +6,7 @@ export const AnnouncementBar = () => {
   const marqueeItems = [
     'FREE DELIVERY OVER $99',
     'AUTHENTIC OVERSTOCK',
-    'UP TO 90% OFF RETAIL',
+    'UP TO 75% OFF MSRP',
     'SCARBOROUGH PICKUP - 705 PROGRESS AVE #32',
     'TESTED & INSPECTED LOTS',
     'SAME-DAY WAREHOUSE DISPATCH'

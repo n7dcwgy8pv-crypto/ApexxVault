@@ -338,15 +338,7 @@ export const AuctionProvider = ({ children }) => {
   const loadProducts = useCallback(async () => {
     setIsLoadingProducts(true);
     try {
-      const res = await fetchProductsFromDB({
-        category: selectedCategory,
-        condition: selectedConditions,
-        search: searchQuery,
-        sortBy,
-        priceMax,
-        eventId: selectedEventId,
-        inStockOnly: stockFilter === 'in_stock'
-      });
+      const res = await fetchProductsFromDB({});
 
       if (res && res.data) {
         setProducts(res.data);
@@ -359,7 +351,7 @@ export const AuctionProvider = ({ children }) => {
     } finally {
       setIsLoadingProducts(false);
     }
-  }, [selectedCategory, selectedConditions, searchQuery, sortBy, priceMax, selectedEventId, stockFilter]);
+  }, []);
 
   const openMakeOffer = useCallback(
     (product) => {
@@ -957,6 +949,19 @@ export const AuctionProvider = ({ children }) => {
       });
   }, [products, selectedCategory, selectedConditions, stockFilter, priceMax, searchQuery, sortBy]);
 
+  // Dynamic Category Counts (Single Source of Truth across all views - Finding C4)
+  const categoryCounts = useMemo(() => {
+    const counts = { all: Array.isArray(products) ? products.length : 0 };
+    if (Array.isArray(products)) {
+      products.forEach((p) => {
+        if (p && p.category) {
+          counts[p.category] = (counts[p.category] || 0) + 1;
+        }
+      });
+    }
+    return counts;
+  }, [products]);
+
   // Catalog Sanitization Action (Finding C3, C4, C6, C7, A7, A8, A10, A11)
   const sanitizeCatalogAction = useCallback(async () => {
     try {
@@ -1084,6 +1089,8 @@ export const AuctionProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateCartQuantity,
+        updateCartItemQuantity: updateCartQuantity,
+        categoryCounts,
         clearCart,
         buyNowDirect,
         toggleWatchlist,

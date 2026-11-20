@@ -75,9 +75,8 @@ export const AdminPortalModal = ({ forceInline = false, onClose }) => {
     setIsAdminPortalOpen(false);
     if (typeof onClose === 'function') {
       onClose();
-    } else {
-      navigate('/');
     }
+    navigate('/');
   };
 
   useEffect(() => {
@@ -634,7 +633,7 @@ export const AdminPortalModal = ({ forceInline = false, onClose }) => {
             flexWrap: 'wrap'
           }}
         >
-          <div className="tab-button-group" style={{ maxWidth: '820px', flexWrap: 'wrap' }}>
+          <div className="tab-button-group admin-tabs-scrollable" style={{ maxWidth: '100%', overflowX: 'auto', whiteSpace: 'nowrap', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
             <button
               type="button"
               className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}

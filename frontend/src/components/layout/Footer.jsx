@@ -36,7 +36,7 @@ export const Footer = () => {
             </Link>
 
             <p className="footer-about-text">
-              Scarborough's premier direct liquidation depot for verified retail surplus, contractor tools, consumer electronics, and wholesale pallets. Inspected in-house, priced up to 90% below retail MSRP (CAD).
+              Scarborough's premier direct liquidation depot for verified retail surplus, contractor tools, consumer electronics, and wholesale pallets. Inspected in-house, priced up to 75% below retail MSRP (CAD).
             </p>
 
             <div className="footer-contact-list">
