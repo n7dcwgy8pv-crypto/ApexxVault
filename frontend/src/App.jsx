@@ -1,104 +1,191 @@
 import React from 'react';
 import { AnnouncementBar } from './components/layout/AnnouncementBar';
 import { Navbar } from './components/layout/Navbar';
-import { SubNav } from './components/layout/SubNav';
-import { AuctionHeader } from './components/layout/AuctionHeader';
-import { FilterSidebar } from './components/filters/FilterSidebar';
-import { SortBar } from './components/catalog/SortBar';
-import { CatalogView } from './components/catalog/CatalogView';
 import { Footer } from './components/layout/Footer';
+import { FloatingChat } from './components/common/FloatingChat';
 
-import { BulkUploadModal } from './components/bulk-upload/BulkUploadModal';
-import { ProductDetailModal } from './components/lot-details/ProductDetailModal';
-import { OrderConfirmationModal } from './components/cart/OrderConfirmationModal';
-import { CheckoutSuccessModal } from './components/cart/CheckoutSuccessModal';
-import { EmailInvoicePreviewModal } from './components/cart/EmailInvoicePreviewModal';
-import { EmailSettingsModal } from './components/admin/EmailSettingsModal';
-import { WarehouseScannerModal } from './components/admin/WarehouseScannerModal';
+// Views
+import { HomePage } from './views/HomePage';
+import { CatalogPage } from './views/CatalogPage';
+import { CategoriesPage } from './views/CategoriesPage';
+import { ProductDetailPage } from './views/ProductDetailPage';
+import { SearchPage } from './views/SearchPage';
+import { CartPage } from './views/CartPage';
+import { CheckoutPage } from './views/CheckoutPage';
+import { CheckoutSuccessPage } from './views/CheckoutSuccessPage';
+import { AccountPage } from './views/AccountPage';
+import { AboutUsPage } from './views/AboutUsPage';
+import { ContactPage } from './views/ContactPage';
+import { ConditionGuidePage } from './views/ConditionGuidePage';
+import { FreightPage } from './views/FreightPage';
+import { PolicyPage } from './views/PolicyPage';
+import { AdminPage } from './views/AdminPage';
+
+// Modals & Drawers
+import { CartDrawer } from './components/cart/CartDrawer';
 import { WatchlistDrawer } from './components/dashboard/WatchlistDrawer';
-import { AuthModal } from './components/auth/AuthModal';
-import { AdminPortalModal } from './components/admin/AdminPortalModal';
-import { ConditionGuideModal } from './components/catalog/ConditionGuideModal';
-import { DropAlertModal } from './components/lead-capture/DropAlertModal';
 import { MakeOfferModal } from './components/lot-details/MakeOfferModal';
-import { CustomerPortalModal } from './components/dashboard/CustomerPortalModal';
-import { LiveActivityTicker } from './components/common/LiveActivityTicker';
+import { DropAlertModal } from './components/lead-capture/DropAlertModal';
+import { ConditionGuideModal } from './components/catalog/ConditionGuideModal';
+import { BulkUploadModal } from './components/bulk-upload/BulkUploadModal';
+import { WarehouseScannerModal } from './components/admin/WarehouseScannerModal';
+import { EmailSettingsModal } from './components/admin/EmailSettingsModal';
+import { AuthModal } from './components/auth/AuthModal';
+
 import { useAuction } from './context/AuctionContext';
+import { useRouter } from './context/RouterContext';
 
 import './styles/index.css';
 import './styles/components.css';
 
 export const App = () => {
   const {
-    isEmailSettingsOpen,
-    setIsEmailSettingsOpen,
     isConditionGuideOpen,
     setIsConditionGuideOpen,
     isMakeOfferOpen,
     setIsMakeOfferOpen,
-    offerProduct
+    offerProduct,
+    isEmailSettingsOpen,
+    setIsEmailSettingsOpen
   } = useAuction();
+
+  const { currentPath, matchRoute } = useRouter();
+
+  // Route Matching
+  const renderCurrentView = () => {
+    // 1. Home Page
+    if (currentPath === '/' || currentPath === '') {
+      return <HomePage />;
+    }
+
+    // 2. Collections All
+    if (currentPath === '/collections/all') {
+      return <CatalogPage categorySlug="all" />;
+    }
+
+    // 3. Collections Category
+    const categoryMatch = matchRoute('/collections/:slug');
+    if (categoryMatch.isMatch) {
+      return <CatalogPage categorySlug={categoryMatch.params.slug} />;
+    }
+
+    // 4. Categories Overview Page
+    if (currentPath === '/pages/categories') {
+      return <CategoriesPage />;
+    }
+
+    // 5. Product Detail Page
+    const productMatch = matchRoute('/products/:id');
+    if (productMatch.isMatch) {
+      return <ProductDetailPage productId={productMatch.params.id} />;
+    }
+
+    // 6. Search Page
+    if (currentPath === '/search') {
+      return <SearchPage />;
+    }
+
+    // 7. Cart Page
+    if (currentPath === '/cart') {
+      return <CartPage />;
+    }
+
+    // 8. Checkout Flow
+    if (currentPath === '/checkout') {
+      return <CheckoutPage />;
+    }
+
+    // 9. Checkout Success
+    const checkoutSuccessMatch = matchRoute('/checkout/success/:id');
+    if (checkoutSuccessMatch.isMatch) {
+      return <CheckoutSuccessPage />;
+    }
+
+    // 10. Account Hub
+    if (currentPath === '/account') {
+      return <AccountPage />;
+    }
+
+    // 11. About Us
+    if (currentPath === '/pages/about-us' || currentPath === '/about') {
+      return <AboutUsPage />;
+    }
+
+    // 12. Contact
+    if (currentPath === '/pages/contact' || currentPath === '/contact') {
+      return <ContactPage />;
+    }
+
+    // 13. Condition Guide
+    if (currentPath === '/pages/condition-guide' || currentPath === '/condition-guide') {
+      return <ConditionGuidePage />;
+    }
+
+    // 14. Freight Estimator
+    if (currentPath === '/pages/freight' || currentPath === '/freight') {
+      return <FreightPage />;
+    }
+
+    // 15. Policy Pages
+    const policyMatch = matchRoute('/policies/:policy');
+    if (policyMatch.isMatch) {
+      return <PolicyPage policySlug={policyMatch.params.policy} />;
+    }
+    if (currentPath.startsWith('/policies')) {
+      return <PolicyPage policySlug="privacy" />;
+    }
+
+    // 16. Admin Management Suite
+    if (currentPath === '/admin') {
+      return <AdminPage />;
+    }
+
+    // Default Fallback: Home
+    return <HomePage />;
+  };
 
   return (
     <div className="app-wrapper">
-      {/* Top Liquidation Status Ticker */}
+      {/* Top Announcement Marquee */}
       <AnnouncementBar />
 
-      {/* Main Navbar with Brand, Category Search, User Auth, Admin Portal, Scanner & Bulk Upload */}
+      {/* Main Header */}
       <Navbar />
 
-      {/* Categories & Availability Filters */}
-      <SubNav />
-
-      {/* Primary Catalog Layout */}
-      <main className="container" style={{ flex: 1 }}>
-        {/* Warehouse Surplus Hero & Live Liquidation Savings Stats */}
-        <AuctionHeader />
-
-        {/* Store Grid & Sidebar Filters Layout */}
-        <div className="catalog-main-layout">
-          {/* Faceted Condition, Location, Availability & Price filters */}
-          <FilterSidebar />
-
-          {/* Product Cards Grid & Sorting */}
-          <div style={{ minWidth: 0 }}>
-            <SortBar />
-            <CatalogView />
-          </div>
-        </div>
+      {/* Main Route View */}
+      <main className="main-content-area">
+        {renderCurrentView()}
       </main>
 
-      {/* Warehouse Logistics, Interactive Map & Footer */}
+      {/* Site Footer */}
       <Footer />
 
-      {/* Modals, Drawers & Interactive Enhancements */}
+      {/* Floating WhatsApp Support Button */}
+      <FloatingChat />
+
+      {/* Persistent Slide-Outs & Modals */}
+      <CartDrawer />
+      <WatchlistDrawer />
       <AuthModal />
-      <AdminPortalModal />
       <BulkUploadModal />
-      <ProductDetailModal />
-      <OrderConfirmationModal />
-      <CheckoutSuccessModal />
-      <EmailInvoicePreviewModal />
+      <WarehouseScannerModal />
       <EmailSettingsModal
         isOpen={isEmailSettingsOpen}
         onClose={() => setIsEmailSettingsOpen(false)}
       />
-      <WarehouseScannerModal />
-      <WatchlistDrawer />
 
-      {/* New Roadmap Modals & Interactive Alerts */}
       <ConditionGuideModal
         isOpen={isConditionGuideOpen}
         onClose={() => setIsConditionGuideOpen(false)}
       />
+
       <DropAlertModal />
+
       <MakeOfferModal
         product={offerProduct}
         isOpen={isMakeOfferOpen}
         onClose={() => setIsMakeOfferOpen(false)}
       />
-      <CustomerPortalModal />
-      <LiveActivityTicker />
     </div>
   );
 };

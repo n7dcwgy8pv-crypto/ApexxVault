@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { NotificationProvider } from './context/NotificationContext';
+import { RouterProvider } from './context/RouterContext';
 import { AuctionProvider } from './context/AuctionContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import App from './App';
@@ -20,9 +21,11 @@ if (rootElement) {
     <React.StrictMode>
       <ErrorBoundary>
         <NotificationProvider>
-          <AuctionProvider>
-            <App />
-          </AuctionProvider>
+          <RouterProvider>
+            <AuctionProvider>
+              <App />
+            </AuctionProvider>
+          </RouterProvider>
         </NotificationProvider>
       </ErrorBoundary>
     </React.StrictMode>

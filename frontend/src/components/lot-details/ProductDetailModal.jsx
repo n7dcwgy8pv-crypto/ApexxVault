@@ -20,7 +20,8 @@ import {
   ZoomIn,
   Sparkles,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  Share2
 } from 'lucide-react';
 import { useAuction } from '../../context/AuctionContext';
 import { formatCurrency, formatPercentOff } from '../../utils/formatters';
@@ -42,10 +43,12 @@ export const ProductDetailModal = () => {
     watchlist,
     toggleWatchlist,
     buyNowDirect,
+    addToCart,
     setIsConditionGuideOpen,
     openMakeOffer,
     triggerHoldProduct,
-    heldProductIds
+    heldProductIds,
+    showSuccess
   } = useAuction();
 
   const product = selectedProductModal;
@@ -78,10 +81,61 @@ export const ProductDetailModal = () => {
     return () => clearInterval(interval);
   }, [product, productId, heldProductIds]);
 
+  // Structured Data (JSON-LD Product)
+  useEffect(() => {
+    if (!product) return;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'product-jsonld';
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.title,
+      image: product.images || [],
+      description: product.description || product.conditionNotes || product.title,
+      sku: product.sku,
+      brand: {
+        '@type': 'Brand',
+        name: product.brand || 'ApexxVault Liquidation'
+      },
+      offers: {
+        '@type': 'Offer',
+        price: product.price,
+        priceCurrency: 'CAD',
+        availability: product.stockQty > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        url: `${window.location.origin}?lot=${product.sku}`,
+        seller: {
+          '@type': 'LocalBusiness',
+          name: 'ApexxVault Liquidation Depot',
+          address: '705 Progress Ave #32, Scarborough, ON M1H 2X1, Canada'
+        }
+      }
+    });
+    document.head.appendChild(script);
+    return () => {
+      const existing = document.getElementById('product-jsonld');
+      if (existing) existing.remove();
+    };
+  }, [product]);
+
   if (!product) return null;
 
   const handleBuyNow = () => {
     buyNowDirect(product, selectedQty);
+  };
+
+  const handleAddToCart = () => {
+    addToCart(product, selectedQty);
+  };
+
+  const handleCopyLink = () => {
+    try {
+      const url = `${window.location.origin}?lot=${product.sku}`;
+      navigator.clipboard.writeText(url);
+      showSuccess(`Direct lot link copied to clipboard: ${url}`);
+    } catch {
+      showSuccess(`Lot #${product.sku} ready to share`);
+    }
   };
 
   const formatCountdown = (secs) => {
@@ -129,6 +183,14 @@ export const ProductDetailModal = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              className="modal-close-btn"
+              onClick={handleCopyLink}
+              title="Share / Copy Direct Lot Link"
+              aria-label="Share Link"
+            >
+              <Share2 size={16} />
+            </button>
             <button
               className="modal-close-btn"
               onClick={() => toggleWatchlist(productId)}
@@ -240,7 +302,7 @@ export const ProductDetailModal = () => {
                     <span>Warehouse Intake Inspection</span>
                   </div>
                   <span style={{ fontSize: '0.7rem', color: 'var(--emerald-light)', background: 'var(--emerald-bg)', padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-xs)', fontWeight: 700 }}>
-                    100% Inspected
+                    Individually Graded &amp; Inspected
                   </span>
                 </div>
                 <div>{product.conditionNotes || `Condition classified as ${product.condition}. Verified operational at Scarborough depot.`}</div>
@@ -395,6 +457,7 @@ export const ProductDetailModal = () => {
                     style={{
                       padding: '0.85rem',
                       fontSize: '1rem',
+                      minHeight: '44px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -406,6 +469,30 @@ export const ProductDetailModal = () => {
                     disabled={product.stockQty <= 0}
                   >
                     <MessageCircle size={18} /> DM Me to Buy ({formatCurrency(product.price * selectedQty)})
+                  </button>
+
+                  {/* Add to Vault Cart */}
+                  <button
+                    className="btn-add-cart"
+                    onClick={handleAddToCart}
+                    disabled={product.stockQty <= 0}
+                    style={{
+                      padding: '0.85rem',
+                      fontSize: '0.95rem',
+                      minHeight: '44px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      background: 'var(--bg-card)',
+                      border: '1.5px solid var(--emerald-primary)',
+                      color: 'var(--emerald-light)',
+                      borderRadius: 'var(--radius-md)',
+                      fontWeight: 700,
+                      cursor: product.stockQty <= 0 ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    <ShoppingCart size={18} /> Add to Vault Cart ({selectedQty} {selectedQty === 1 ? 'unit' : 'units'})
                   </button>
 
                   {/* Secondary Negotiation & Hold Row */}

@@ -64,29 +64,60 @@ export const normalizeCondition = (rawCondition) => {
 };
 
 /**
+ * Cleans dirty supplier titles, strips prefixes and fixes mojibake (Finding A11)
+ */
+export const cleanProductTitle = (rawTitle) => {
+  if (!rawTitle) return 'Liquidation Item';
+  let title = rawTitle.toString();
+  // Strip Amazon.com: prefix
+  title = title.replace(/^Amazon\.com\s*:\s*/i, '');
+  // Fix mojibake
+  title = title.replace(/äô/g, "'").replace(/â€TM/g, "'").replace(/â€“/g, "–").replace(/â€œ/g, '"').replace(/â€/g, '"');
+  // Strip trailing (C) variant code
+  title = title.replace(/\s*\([A-Z0-9]\)\s*$/i, '');
+  // Collapse whitespace
+  title = title.replace(/\s+/g, ' ').trim();
+  return title;
+};
+
+/**
  * Normalizes category to internal category keys
  */
-export const normalizeCategory = (rawCat) => {
-  if (!rawCat) return 'electronics';
-  const cat = rawCat.toString().toLowerCase();
+export const normalizeCategory = (rawCat, rawTitle = '') => {
+  const combined = `${rawCat || ''} ${rawTitle || ''}`.toLowerCase();
 
-  if (cat.includes('elect') || cat.includes('tech') || cat.includes('comput') || cat.includes('phone') || cat.includes('tv') || cat.includes('audio')) {
-    return 'electronics';
+  if (
+    combined.includes('wash') || combined.includes('soap') || combined.includes('wipe') ||
+    combined.includes('castor') || combined.includes('oil') || combined.includes('razor') ||
+    combined.includes('pad') || combined.includes('beauty') || combined.includes('lotion') ||
+    combined.includes('glotion') || combined.includes('cocoa butter') || combined.includes('brush') ||
+    combined.includes('glycolic') || combined.includes('clip')
+  ) {
+    return 'health_beauty';
   }
-  if (cat.includes('tool') || cat.includes('hardw') || cat.includes('drill') || cat.includes('saw') || cat.includes('impact')) {
+  if (combined.includes('dog') || combined.includes('cat') || combined.includes('muzzle') || combined.includes('pet')) {
+    return 'pets';
+  }
+  if (combined.includes('boot') || combined.includes('shoe') || combined.includes('snow') || combined.includes('apparel') || combined.includes('jacket')) {
+    return 'apparel';
+  }
+  if (combined.includes('tool') || combined.includes('hardw') || combined.includes('drill') || combined.includes('saw') || combined.includes('impact') || combined.includes('dewalt') || combined.includes('milwaukee')) {
     return 'tools';
   }
-  if (cat.includes('appliance') || cat.includes('kitchen') || cat.includes('vacuum') || cat.includes('cook') || cat.includes('grill') || cat.includes('fryer')) {
+  if (combined.includes('appliance') || combined.includes('kitchen') || combined.includes('vacuum') || combined.includes('cook') || combined.includes('coffee') || combined.includes('espresso') || combined.includes('fryer')) {
     return 'appliances';
   }
-  if (cat.includes('pallet') || cat.includes('bulk') || cat.includes('skid') || cat.includes('wholesale') || cat.includes('gaylord')) {
+  if (combined.includes('pallet') || combined.includes('bulk') || combined.includes('skid') || combined.includes('wholesale') || combined.includes('gaylord')) {
     return 'pallets';
   }
-  if (cat.includes('outdoor') || cat.includes('sport') || cat.includes('patio') || cat.includes('garden') || cat.includes('scooter')) {
+  if (combined.includes('outdoor') || combined.includes('sport') || combined.includes('patio') || combined.includes('garden') || combined.includes('scooter') || combined.includes('tent')) {
     return 'outdoor';
   }
-  if (cat.includes('furn') || cat.includes('chair') || cat.includes('table') || cat.includes('desk') || cat.includes('home')) {
+  if (combined.includes('furn') || combined.includes('chair') || combined.includes('table') || combined.includes('desk') || combined.includes('ottoman') || combined.includes('home')) {
     return 'furniture';
+  }
+  if (combined.includes('elect') || combined.includes('tech') || combined.includes('comput') || combined.includes('phone') || combined.includes('tv') || combined.includes('audio') || combined.includes('laptop') || combined.includes('headphone')) {
+    return 'electronics';
   }
   return 'electronics';
 };

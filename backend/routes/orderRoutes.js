@@ -3,16 +3,19 @@ import {
   createOrder,
   getOrders,
   lookupOrder,
-  releaseOrder
+  releaseOrder,
+  updateOrderStatus
 } from '../controllers/orderController.js';
+import { protect, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/')
-  .get(getOrders)
+  .get(protect, requireAdmin, getOrders)
   .post(createOrder);
 
 router.get('/lookup', lookupOrder);
-router.put('/:orderId/release', releaseOrder);
+router.put('/:orderId/release', protect, requireAdmin, releaseOrder);
+router.put('/:orderId/status', protect, requireAdmin, updateOrderStatus);
 
 export default router;

@@ -11,7 +11,8 @@ import {
   Sparkles,
   PackageCheck,
   Lock,
-  MessageCircle
+  MessageCircle,
+  Clock
 } from 'lucide-react';
 import { useAuction } from '../../context/AuctionContext';
 import { formatCurrency, formatPercentOff } from '../../utils/formatters';
@@ -22,9 +23,11 @@ export const CartDrawer = () => {
     setIsCartOpen,
     cart,
     cartTotals,
+    cartHoldCountdown,
     updateCartQuantity,
     removeFromCart,
     clearCart,
+    openOrderConfirmation,
     openStripePayment,
     setSelectedProductModal
   } = useAuction();
@@ -59,6 +62,30 @@ export const CartDrawer = () => {
           </div>
         </div>
 
+        {/* 30-Minute Reservation Hold Countdown (Finding A12 / Store Urgency) */}
+        {cart.length > 0 && (
+          <div
+            style={{
+              background: 'rgba(245, 158, 11, 0.1)',
+              borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
+              padding: '0.45rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.78rem',
+              color: 'var(--gold-light)'
+            }}
+          >
+            <div className="flex items-center gap-1.5">
+              <Clock size={14} />
+              <span>Cart Reservation Hold:</span>
+            </div>
+            <strong style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+              {cartHoldCountdown} remaining
+            </strong>
+          </div>
+        )}
+
         {/* Cart Item List */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
           {cart.length === 0 ? (
@@ -79,10 +106,11 @@ export const CartDrawer = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {cart.map(({ product, quantity }) => {
+                const prodId = product.id || product._id;
                 const itemSavings = formatPercentOff(product.price, product.retailMSRP);
 
                 return (
-                  <div key={product.id} className="cart-item-row">
+                  <div key={prodId} className="cart-item-row">
                     <div
                       className="cart-item-thumb"
                       onClick={() => {
@@ -131,14 +159,14 @@ export const CartDrawer = () => {
                         <div className="qty-stepper">
                           <button
                             className="qty-btn"
-                            onClick={() => updateCartQuantity(product.id, quantity - 1)}
+                            onClick={() => updateCartQuantity(prodId, quantity - 1)}
                           >
                             <Minus size={12} />
                           </button>
                           <span className="qty-val">{quantity}</span>
                           <button
                             className="qty-btn"
-                            onClick={() => updateCartQuantity(product.id, quantity + 1)}
+                            onClick={() => updateCartQuantity(prodId, quantity + 1)}
                             disabled={quantity >= (product.stockQty || 99)}
                           >
                             <Plus size={12} />
@@ -148,7 +176,7 @@ export const CartDrawer = () => {
                     </div>
 
                     <button
-                      onClick={() => removeFromCart(product.id)}
+                      onClick={() => removeFromCart(prodId)}
                       style={{ color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
                       title="Remove"
                     >

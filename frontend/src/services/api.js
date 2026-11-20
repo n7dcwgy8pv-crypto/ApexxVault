@@ -426,3 +426,86 @@ export const holdProductInDB = async (productId, durationMinutes = 120, user = n
   }
 };
 
+/**
+ * 1-Click Sanitize & Deduplicate Catalog (Fixing C3, C4, C6, C7, A7, A8, A9, A10, A11)
+ */
+export const sanitizeAndDeduplicateCatalogInDB = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/sanitize-catalog`, {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('sanitizeAndDeduplicateCatalogInDB error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Update order status (Reserved -> Paid -> Ready for Pickup -> Picked Up / Cancelled / Refunded)
+ */
+export const updateOrderStatusInDB = async (orderId, statusData) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/status`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(statusData)
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('updateOrderStatusInDB error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Delete a user account (Admin only)
+ */
+export const deleteUserInDB = async (userId) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/users/${encodeURIComponent(userId)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('deleteUserInDB error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Update user role (customer <-> admin)
+ */
+export const updateUserRoleInDB = async (userId, role) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/users/${encodeURIComponent(userId)}/role`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ role })
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('updateUserRoleInDB error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Change current user password
+ */
+export const changePasswordApi = async (currentPassword, newPassword) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('changePasswordApi error:', error);
+    return { success: false, error: error.message };
+  }
+};
+

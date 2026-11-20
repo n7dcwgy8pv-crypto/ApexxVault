@@ -51,12 +51,15 @@ export const AUCTION_EVENTS = [
 
 export const CATEGORIES = [
   { id: 'all', name: 'All Categories', icon: 'LayoutGrid', count: 124 },
-  { id: 'electronics', name: 'Consumer Electronics', icon: 'Smartphone', count: 38 },
-  { id: 'tools', name: 'Power Tools & Hardware', icon: 'Hammer', count: 29 },
-  { id: 'appliances', name: 'Home & Kitchen Appliances', icon: 'Coffee', count: 24 },
-  { id: 'pallets', name: 'Wholesale & Mystery Pallets', icon: 'Boxes', count: 12 },
-  { id: 'outdoor', name: 'Sports, Patio & Outdoor', icon: 'Tent', count: 11 },
-  { id: 'furniture', name: 'Furniture & Living', icon: 'Armchair', count: 10 }
+  { id: 'electronics', name: 'Consumer Electronics', icon: 'Smartphone', count: 32 },
+  { id: 'tools', name: 'Power Tools & Hardware', icon: 'Hammer', count: 24 },
+  { id: 'appliances', name: 'Home & Kitchen Appliances', icon: 'Coffee', count: 18 },
+  { id: 'health_beauty', name: 'Health & Beauty', icon: 'Sparkles', count: 22 },
+  { id: 'pets', name: 'Pet Supplies', icon: 'Heart', count: 12 },
+  { id: 'furniture', name: 'Furniture & Living', icon: 'Armchair', count: 10 },
+  { id: 'apparel', name: 'Apparel & Footwear', icon: 'Tag', count: 8 },
+  { id: 'outdoor', name: 'Sports, Patio & Outdoor', icon: 'Tent', count: 9 },
+  { id: 'pallets', name: 'Wholesale & Mystery Pallets', icon: 'Boxes', count: 6 }
 ];
 
 export const CONDITIONS = [

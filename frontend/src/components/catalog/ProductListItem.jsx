@@ -17,7 +17,8 @@ export const ProductListItem = ({ product }) => {
     toggleWatchlist,
     addToCart,
     buyNowDirect,
-    setSelectedProductModal
+    setSelectedProductModal,
+    isAdmin
   } = useAuction();
 
   const productId = product.id || product._id;
@@ -74,12 +75,10 @@ export const ProductListItem = ({ product }) => {
         </h4>
 
         <div className="flex items-center gap-2" style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          {product.warehouseLocation && (
-            <span className="flex items-center gap-1">
-              <MapPin size={12} color="var(--emerald-light)" />
-              Bay {product.warehouseLocation}
-            </span>
-          )}
+          <span className="flex items-center gap-1">
+            <MapPin size={12} color="var(--emerald-light)" />
+            {isAdmin && product.warehouseLocation ? `Bay ${product.warehouseLocation}` : 'Scarborough Depot Pickup'}
+          </span>
           <span>• Verified Liquidation Unit</span>
         </div>
       </div>
@@ -106,6 +105,7 @@ export const ProductListItem = ({ product }) => {
           disabled={isOutOfStock}
           style={{
             flex: 1,
+            minHeight: '44px',
             padding: '0.6rem 1rem',
             background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: '#ffffff',
@@ -122,9 +122,35 @@ export const ProductListItem = ({ product }) => {
         </button>
 
         <button
+          onClick={() => addToCart(product, 1)}
+          disabled={isOutOfStock}
+          style={{
+            width: '44px',
+            height: '44px',
+            minWidth: '44px',
+            minHeight: '44px',
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--emerald-light)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: isOutOfStock ? 'not-allowed' : 'pointer'
+          }}
+          title="Add to Vault Cart"
+          aria-label="Add to Vault Cart"
+        >
+          <ShoppingCart size={16} />
+        </button>
+
+        <button
           onClick={() => toggleWatchlist(productId)}
           style={{
-            padding: '0.6rem',
+            width: '44px',
+            height: '44px',
+            minWidth: '44px',
+            minHeight: '44px',
             borderRadius: 'var(--radius-full)',
             background: 'var(--bg-secondary)',
             border: '1px solid var(--border-subtle)',
@@ -135,6 +161,7 @@ export const ProductListItem = ({ product }) => {
             cursor: 'pointer'
           }}
           title={isWatched ? 'Remove from Saved' : 'Save Asset'}
+          aria-label={isWatched ? 'Remove from Saved' : 'Save Asset'}
         >
           <Heart size={16} fill={isWatched ? 'currentColor' : 'none'} />
         </button>

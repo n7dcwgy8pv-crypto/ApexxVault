@@ -232,7 +232,7 @@ export const AuthModal = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--text-primary)' }}>
-                {authModalMode === 'login' && 'Sign In to ApexVault'}
+                {authModalMode === 'login' && 'Sign In to ApexxVault'}
                 {authModalMode === 'register' && 'Create Customer Account'}
                 {authModalMode === 'forgot' && 'Reset Your Password'}
                 {authModalMode === 'reset' && 'Set New Password'}

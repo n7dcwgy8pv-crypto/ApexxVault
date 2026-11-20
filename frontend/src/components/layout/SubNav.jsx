@@ -9,6 +9,8 @@ import {
   Armchair,
   CheckCircle2,
   Sparkles,
+  Heart,
+  Tag,
   Percent
 } from 'lucide-react';
 import { useAuction } from '../../context/AuctionContext';
@@ -21,7 +23,10 @@ const ICON_MAP = {
   Coffee,
   Boxes,
   Tent,
-  Armchair
+  Armchair,
+  Sparkles,
+  Heart,
+  Tag
 };
 
 export const SubNav = () => {

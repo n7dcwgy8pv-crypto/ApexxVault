@@ -14,6 +14,18 @@ const productSchema = new mongoose.Schema(
       trim: true,
       index: true
     },
+    brand: {
+      type: String,
+      default: '',
+      trim: true,
+      index: true
+    },
+    modelNumber: {
+      type: String,
+      default: '',
+      trim: true,
+      index: true
+    },
     category: {
       type: String,
       default: 'general',
@@ -40,6 +52,28 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0
+    },
+    costPrice: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    barcode: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    weightKg: {
+      type: Number,
+      default: 0
+    },
+    dimensions: {
+      type: String,
+      default: ''
+    },
+    supplier: {
+      type: String,
+      default: ''
     },
     stockQty: {
       type: Number,
@@ -97,9 +131,11 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Search Index on title, sku, description, conditionNotes
+// Search Index on title, brand, modelNumber, sku, description, conditionNotes
 productSchema.index({
   title: 'text',
+  brand: 'text',
+  modelNumber: 'text',
   sku: 'text',
   description: 'text',
   conditionNotes: 'text'

@@ -7,8 +7,8 @@ export const WAREHOUSE_PICKUP_DETAILS = {
   postalCode: 'M1H 2X1',
   country: 'Canada',
   fullAddress: '705 Progress Ave #32, Scarborough, ON M1H 2X1, Canada',
-  phone: '+1 (639) 571-6702',
-  email: 'aayushgamot21@gmail.com',
+  phone: '+1 (416) 571-6702',
+  email: 'support@apexxvault.com',
   hours: 'Mon – Sat: 11:00 AM – 6:00 PM EST | Sunday: 11:00 AM – 5:00 PM EST',
   instructions: 'Bring your Order Invoice Barcode (on your phone or printed) and 1 piece of Government ID for warehouse staff release at Unit #32.'
 };
@@ -75,21 +75,21 @@ export const generateInvoiceHtml = (order) => {
   <div style="max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 8px 30px rgba(0,0,0,0.25);">
     
     <!-- Header Banner -->
-    <div style="background: linear-gradient(135deg, #0d1527 0%, #1e1b4b 100%); padding: 30px 36px; color: #ffffff;">
+    <div style="background: #2A170A; border-bottom: 2px solid #B07D2B; padding: 30px 36px; color: #FAF6EF;">
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
           <td>
-            <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.02em;">
-              APEXX<span style="color: #6366f1;">VAULT</span>
+            <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.02em; color: #FAF6EF;">
+              APEXX<span style="color: #B07D2B;">VAULT</span>
             </h1>
-            <p style="margin: 4px 0 0 0; font-size: 13px; color: #a5b4fc; font-weight: 600;">
-              Asset &amp; Liquidation Marketplace
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #DBCFBD; font-weight: 600;">
+              Scarborough Liquidation &amp; Surplus Depot • Unit #32
             </p>
           </td>
           <td style="text-align: right;">
-            <div style="font-size: 12px; text-transform: uppercase; color: #93c5fd; font-weight: 800; letter-spacing: 0.05em;">Official Invoice</div>
-            <div style="font-size: 20px; font-weight: 900; font-family: monospace; color: #ffffff;">${order.orderId}</div>
-            <div style="font-size: 12px; color: #a5b4fc;">${formatDate(order.date)}</div>
+            <div style="font-size: 12px; text-transform: uppercase; color: #B07D2B; font-weight: 800; letter-spacing: 0.05em;">Official Order Invoice</div>
+            <div style="font-size: 20px; font-weight: 900; font-family: monospace; color: #FAF6EF;">${order.orderId}</div>
+            <div style="font-size: 12px; color: #DBCFBD;">${formatDate(order.date)}</div>
           </td>
         </tr>
       </table>
@@ -229,7 +229,7 @@ export const generateInvoiceHtml = (order) => {
     <!-- Footer -->
     <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px 36px; font-size: 11px; color: #64748b; text-align: center; line-height: 1.5;">
       ApexxVault Inc. • 705 Progress Ave #32, Scarborough, ON M1H 2X1<br>
-      Customer Support: aayushgamot21@gmail.com | (639) 571-6702
+      Customer Support: support@apexxvault.com | (416) 571-6702
     </div>
   </div>
 </body>

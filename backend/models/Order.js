@@ -57,17 +57,16 @@ const orderSchema = new mongoose.Schema(
     cardLast4: { type: String, default: '4242' },
     status: {
       type: String,
-      enum: [
-        'Ready for Pickup',
-        'Ready for Warehouse Pickup',
-        'Inquiry / DM Reserved',
-        'Released to Customer',
-        'Reserved',
-        'Cancelled'
-      ],
-      default: 'Ready for Pickup',
+      default: 'Paid',
       index: true
     },
+    holdExpiresAt: { type: Date },
+    taxDetails: {
+      hstRate: { type: Number, default: 0.13 },
+      hstAmount: { type: Number, default: 0 }
+    },
+    refundReason: { type: String, default: '' },
+    refundedAt: { type: Date },
     emailDispatchedTo: { type: String, default: '' },
     isReleased: { type: Boolean, default: false },
     releasedAt: { type: Date },

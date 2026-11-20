@@ -233,7 +233,7 @@ export const generateInvoiceHtml = (order) => {
     <!-- Footer -->
     <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px 36px; font-size: 11px; color: #64748b; text-align: center; line-height: 1.5;">
       ApexxVault Inc. • 705 Progress Ave #32, Scarborough, ON M1H 2X1<br>
-      Customer Support: aayushgamot21@gmail.com | (639) 571-6702
+      Customer Support: support@apexxvault.com | (416) 571-6702
     </div>
   </div>
 </body>

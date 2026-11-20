@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, PackageCheck, MapPin, MessageCircle, DollarSign, Lock, Clock, Info, ShieldCheck } from 'lucide-react';
+import {
+  Heart,
+  PackageCheck,
+  DollarSign,
+  ShoppingCart,
+  Zap,
+  Info,
+  Clock,
+  Sparkles
+} from 'lucide-react';
 import { useAuction } from '../../context/AuctionContext';
+import { useRouter } from '../../context/RouterContext';
 import { formatCurrency, formatPercentOff } from '../../utils/formatters';
 
 const CONDITION_CLASS_MAP = {
@@ -15,13 +25,13 @@ export const ProductCard = ({ product }) => {
   const {
     watchlist,
     toggleWatchlist,
-    buyNowDirect,
-    setSelectedProductModal,
-    setIsConditionGuideOpen,
+    addToCart,
     openMakeOffer,
-    triggerHoldProduct,
-    heldProductIds
+    heldProductIds,
+    setCart
   } = useAuction();
+
+  const { navigate } = useRouter();
 
   const productId = product.id || product._id;
   const isWatched = watchlist.includes(productId);
@@ -31,7 +41,7 @@ export const ProductCard = ({ product }) => {
   const isLowStock = product.stockQty <= 3 && product.stockQty > 0;
   const isOutOfStock = product.stockQty <= 0;
 
-  // Check Flash Hold timer
+  // Flash Hold timer check
   const [holdRemainingSecs, setHoldRemainingSecs] = useState(null);
   useEffect(() => {
     const holdExpiry = heldProductIds[productId] || product.holdUntil;
@@ -47,22 +57,33 @@ export const ProductCard = ({ product }) => {
     return () => clearInterval(interval);
   }, [product, productId, heldProductIds]);
 
-  const formatCountdown = (secs) => {
-    if (!secs) return '00:00:00';
-    const hrs = Math.floor(secs / 3600);
-    const mins = Math.floor((secs % 3600) / 60);
-    const s = secs % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const handleCardClick = () => {
+    navigate(`/products/${productId}`);
+  };
+
+  const handleBuyNow = (e) => {
+    e.stopPropagation();
+    if (isOutOfStock) return;
+    // Add item to cart and navigate straight to checkout
+    addToCart(product, 1);
+    navigate('/checkout');
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (isOutOfStock) return;
+    addToCart(product, 1);
+  };
+
+  const handleOffer = (e) => {
+    e.stopPropagation();
+    openMakeOffer(product);
   };
 
   return (
-    <div className="lot-card animate-float">
-      {/* Image Container with Quick View & Badges */}
-      <div
-        className="lot-card-image-wrap"
-        onClick={() => setSelectedProductModal(product)}
-        style={{ cursor: 'pointer' }}
-      >
+    <div className="lot-card animate-float" onClick={handleCardClick} role="button" tabIndex={0}>
+      {/* Image Wrap */}
+      <div className="lot-card-image-wrap">
         <img
           src={
             product.images && product.images[0]
@@ -74,192 +95,129 @@ export const ProductCard = ({ product }) => {
           loading="lazy"
         />
 
-        {/* SKU Tag */}
-        <div className="lot-number-tag">
-          SKU #{product.sku}
-        </div>
-
-        {/* Wishlist Button */}
+        {/* Wishlist Heart */}
         <button
+          type="button"
           className={`lot-watch-btn ${isWatched ? 'watched' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             toggleWatchlist(productId);
           }}
-          title={isWatched ? 'Remove from Saved' : 'Save Asset'}
-          aria-label={isWatched ? 'Remove from Saved' : 'Save Asset'}
+          title={isWatched ? 'Remove from Saved' : 'Save Lot'}
+          aria-label="Save Lot"
         >
-          <Heart size={15} fill={isWatched ? 'currentColor' : 'none'} />
+          <Heart size={16} fill={isWatched ? '#DC2626' : 'none'} color={isWatched ? '#DC2626' : 'currentColor'} />
         </button>
 
-        {/* Hold Lock Overlay Banner if active */}
-        {holdRemainingSecs !== null && holdRemainingSecs > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '10px',
-              left: '10px',
-              zIndex: 3,
-              background: 'rgba(245, 158, 11, 0.95)',
-              color: '#000000',
-              fontWeight: 800,
-              fontSize: '0.7rem',
-              padding: '0.2rem 0.5rem',
-              borderRadius: 'var(--radius-xs)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-            }}
-          >
-            <Clock size={12} />
-            <span>HELD: {formatCountdown(holdRemainingSecs)}</span>
-          </div>
-        )}
-
-        {/* Stock Status Ribbon Overlay */}
-        <div className="stock-tag-ribbon">
-          <span
-            className="flex items-center gap-1 font-mono"
-            style={{
-              fontSize: '0.725rem',
-              color: isOutOfStock ? '#fda4af' : isLowStock ? '#fca5a5' : '#86efac'
-            }}
-          >
-            <PackageCheck size={13} />
-            {isOutOfStock
-              ? 'Out of Stock'
-              : isLowStock
-              ? `Only ${product.stockQty} Left`
-              : `${product.stockQty} in Stock`}
+        {/* Condition Ribbon Top-Left */}
+        <div className="card-top-badges">
+          <span className={`badge-condition ${condClass}`}>
+            {product.condition}
           </span>
-
-          {product.warehouseLocation && (
-            <span
-              className="flex items-center gap-1 font-mono"
-              style={{ fontSize: '0.7rem', color: '#cbd5e1' }}
-            >
-              <MapPin size={11} />
-              Bay {product.warehouseLocation}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Card Body */}
-      <div className="lot-card-body">
-        {/* Condition Badge & Value Tag */}
-        <div className="flex items-center justify-between gap-2">
-          <div
-            onClick={() => setIsConditionGuideOpen(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', cursor: 'pointer' }}
-            title="Click to view Condition Guide"
-          >
-            <span className={`badge-condition ${condClass}`}>
-              {product.condition}
-            </span>
-            <Info size={12} color="var(--emerald-light)" />
-          </div>
-
-          {savingsPct >= 40 && (
-            <span
-              style={{
-                background: 'var(--emerald-bg)',
-                color: 'var(--emerald-light)',
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                padding: '0.15rem 0.5rem',
-                borderRadius: 'var(--radius-xs)',
-                border: '1px solid rgba(16, 185, 129, 0.35)',
-                letterSpacing: '0.04em'
-              }}
-            >
+          {savingsPct >= 30 && (
+            <span className="badge-save-gold">
               SAVE ${Math.round(dollarSavings)}
             </span>
           )}
         </div>
 
-        {/* Title */}
-        <h3
-          className="lot-card-title"
-          title={product.title}
-          onClick={() => setSelectedProductModal(product)}
-          style={{ cursor: 'pointer' }}
-        >
+        {/* Hold Notice if active */}
+        {holdRemainingSecs !== null && holdRemainingSecs > 0 && (
+          <div className="card-hold-badge">
+            <Clock size={12} />
+            <span>HELD ({Math.floor(holdRemainingSecs / 60)}m left)</span>
+          </div>
+        )}
+
+        {/* Out of stock overlay */}
+        {isOutOfStock && (
+          <div className="card-sold-out-overlay">
+            <span>SOLD OUT</span>
+          </div>
+        )}
+      </div>
+
+      {/* Card Content */}
+      <div className="lot-card-body">
+        {/* Brand & SKU line */}
+        <div className="lot-meta-line">
+          <span className="lot-brand">{product.brand || 'ApexxVault Certified'}</span>
+          <span className="lot-sku">Lot #{product.sku}</span>
+        </div>
+
+        {/* 2-Line Title */}
+        <h3 className="lot-card-title" title={product.title}>
           {product.title}
         </h3>
 
-        {/* Pricing Box */}
+        {/* Price Box */}
         <div className="lot-price-box">
           <div className="current-bid-row">
-            <span className="bid-label">Liquidation Price</span>
             <span className="price-highlight">
               {formatCurrency(product.price)}
             </span>
-          </div>
-
-          <div className="msrp-row">
-            <span style={{ color: 'var(--text-muted)' }}>
-              Retail MSRP: <span className="msrp-value">{formatCurrency(product.retailMSRP)}</span>
-            </span>
             {savingsPct > 0 && (
-              <span className="savings-tag">
+              <span className="savings-pill">
                 {savingsPct}% OFF
               </span>
             )}
           </div>
+
+          <div className="msrp-row">
+            <span className="msrp-label">MSRP:</span>
+            <span className="msrp-value">{formatCurrency(product.retailMSRP)}</span>
+          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '0.5rem', marginTop: '0.75rem' }}>
+        {/* Stock Status Line */}
+        <div className="lot-stock-line">
+          <PackageCheck size={13} className="stock-icon" />
+          <span className={isOutOfStock ? 'stock-out' : isLowStock ? 'stock-low' : 'stock-ok'}>
+            {isOutOfStock
+              ? 'Sold Out'
+              : isLowStock
+              ? `Only ${product.stockQty} left in Scarborough depot`
+              : 'In Stock — Ready for Pickup or Delivery'}
+          </span>
+        </div>
+
+        {/* Actions Grid: Add to Cart + Buy Now + Offer */}
+        <div className="lot-card-actions-row">
           <button
-            className="btn-buy-now"
-            onClick={() => buyNowDirect(product, 1)}
+            type="button"
+            className="btn-add-cart-primary"
+            onClick={handleAddToCart}
             disabled={isOutOfStock}
-            title="Direct Message Seller to Buy"
-            style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#ffffff',
-              padding: '0.55rem 0.75rem',
-              borderRadius: 'var(--radius-full)',
-              fontWeight: 700,
-              fontSize: '0.825rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.35rem',
-              cursor: isOutOfStock ? 'not-allowed' : 'pointer',
-              border: 'none',
-              boxShadow: 'var(--shadow-emerald)'
-            }}
+            title="Add to Cart"
           >
-            <MessageCircle size={14} /> DM Me
+            <ShoppingCart size={15} />
+            <span>Add to Cart</span>
           </button>
 
           <button
             type="button"
-            onClick={() => openMakeOffer(product)}
-            style={{
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-muted)',
-              color: 'var(--gold-light)',
-              padding: '0.55rem 0.5rem',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.25rem',
-              cursor: 'pointer'
-            }}
-            title="Make an Offer / Bulk Inquire"
+            className="btn-buy-now-outline"
+            onClick={handleBuyNow}
+            disabled={isOutOfStock}
+            title="Buy Now (Direct to Checkout)"
           >
-            <DollarSign size={13} />
-            <span>Offer</span>
+            <Zap size={14} />
+            <span>Buy Now</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-offer-icon"
+            onClick={handleOffer}
+            title="Make an Offer"
+            aria-label="Make an Offer"
+          >
+            <DollarSign size={15} />
           </button>
         </div>
       </div>
     </div>
   );
 };
+
+export default ProductCard;

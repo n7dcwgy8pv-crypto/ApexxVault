@@ -9,8 +9,8 @@ export const WAREHOUSE_PICKUP_DETAILS = {
   postalCode: 'M1H 2X1',
   country: 'Canada',
   fullAddress: '705 Progress Ave #32, Scarborough, ON M1H 2X1, Canada',
-  phone: '+1 (639) 571-6702',
-  email: 'aayushgamot21@gmail.com',
+  phone: '+1 (416) 571-6702',
+  email: 'support@apexxvault.com',
   hours: 'Mon – Sat: 11:00 AM – 6:00 PM EST | Sunday: 11:00 AM – 5:00 PM EST',
   instructions: 'Bring your Order Invoice Barcode (on your phone or printed) and 1 piece of Government ID for warehouse staff release at Unit #32.'
 };

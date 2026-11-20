@@ -12,6 +12,15 @@ export const createOrder = async (req, res) => {
   try {
     const orderData = req.body;
 
+    // Normalize order status
+    if (orderData.status) {
+      if (orderData.status.toUpperCase() === 'PAID') orderData.status = 'Paid';
+      else if (orderData.status.toUpperCase() === 'RESERVED') orderData.status = 'Reserved';
+      else if (orderData.status.toUpperCase() === 'CONFIRMED') orderData.status = 'Paid';
+    } else {
+      orderData.status = 'Paid';
+    }
+
     // Create order document in MongoDB
     const order = await Order.create(orderData);
 
@@ -76,9 +85,10 @@ export const createOrder = async (req, res) => {
             console.log(`[Owner Invoice Copy Delivered to ${OWNER_EMAIL}] ID: ${ownerData?.id}`);
           }
         }
-      } catch (mailErr) {
-        console.warn('[Email Dispatch Error]:', mailErr.message);
       }
+    } catch (mailErr) {
+      console.warn('[Email Dispatch Error]:', mailErr.message);
+    }
     } else {
       console.warn('[ORDER DISPATCH] RESEND_API_KEY is not configured in environment.');
     }
@@ -158,7 +168,7 @@ export const releaseOrder = async (req, res) => {
       { orderId: req.params.orderId },
       {
         isReleased: true,
-        status: 'Released to Customer',
+        status: 'Picked Up',
         releasedAt: new Date()
       },
       { new: true }
@@ -169,6 +179,72 @@ export const releaseOrder = async (req, res) => {
     }
 
     res.json({ success: true, message: 'Order marked as released to customer', data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Update order status (Reserved -> Paid -> Ready for Pickup -> Picked Up / Cancelled / Refunded)
+// @route   PUT /api/orders/:orderId/status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status, refundReason } = req.body;
+    const validStatuses = [
+      'Reserved',
+      'Paid',
+      'Ready for Pickup',
+      'Ready for Warehouse Pickup',
+      'Picked Up',
+      'Released to Customer',
+      'Inquiry / DM Reserved',
+      'Cancelled',
+      'Refunded'
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, error: `Invalid status: ${status}` });
+    }
+
+    const order = await Order.findOne({ orderId: req.params.orderId });
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    const previousStatus = order.status;
+    order.status = status;
+
+    if (status === 'Picked Up' || status === 'Released to Customer') {
+      order.isReleased = true;
+      order.releasedAt = new Date();
+    }
+
+    if (status === 'Refunded') {
+      order.refundReason = refundReason || 'Customer refund processed';
+      order.refundedAt = new Date();
+    }
+
+    // If order was cancelled, return stock units to inventory
+    if (status === 'Cancelled' && previousStatus !== 'Cancelled' && previousStatus !== 'Refunded') {
+      if (Array.isArray(order.items) && order.items.length > 0) {
+        for (const item of order.items) {
+          const prodId = item.product?.id || item.product?._id;
+          const qty = item.quantity || 1;
+          if (prodId) {
+            await Product.findByIdAndUpdate(prodId, {
+              $inc: { stockQty: qty, salesCount: -qty }
+            });
+          }
+        }
+      }
+    }
+
+    await order.save();
+    res.json({
+      success: true,
+      message: `Order #${order.orderId} status transitioned to "${status}"`,
+      data: order,
+      order: order
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

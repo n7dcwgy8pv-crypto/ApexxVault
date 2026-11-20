@@ -63,7 +63,7 @@ export const AuctionHeader = () => {
           </h1>
 
           <p className="hero-description">
-            Instant buyout on brand-new overstock, certified open box hardware, premium electronics, contractor tools, and wholesale pallets at up to 90% off MSRP.
+            Instant buyout on brand-new overstock, certified open box hardware, premium electronics, contractor tools, and wholesale pallets at up to 75% below retail MSRP (CAD).
           </p>
 
           {/* Highlights Row */}
@@ -83,7 +83,7 @@ export const AuctionHeader = () => {
               }}
             >
               <PackageCheck size={16} />
-              <span>Verified 100% Inspected Lots</span>
+              <span>Individually Graded &amp; Inspected Lots</span>
             </div>
 
             <div

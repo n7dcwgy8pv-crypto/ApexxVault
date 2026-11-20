@@ -27,10 +27,10 @@ export const register = async (req, res) => {
       role
     } = req.body;
 
-    if (!firstName || !lastName || !email || !phone || !street || !city || !postalCode || !password) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
         success: false,
-        error: 'Please provide all required registration fields'
+        error: 'Please provide first name, last name, email, and password.'
       });
     }
 
@@ -46,11 +46,11 @@ export const register = async (req, res) => {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.toLowerCase().trim(),
-      phone: phone.trim(),
-      street: street.trim(),
-      city: city.trim(),
-      province: province ? province.trim() : 'Ontario',
-      postalCode: postalCode.trim(),
+      phone: (phone || '').trim(),
+      street: (street || '').trim(),
+      city: (city || 'Scarborough').trim(),
+      province: (province || 'Ontario').trim(),
+      postalCode: (postalCode || '').trim(),
       password,
       role: role === 'admin' ? 'admin' : 'customer'
     });
@@ -284,6 +284,79 @@ export const getAllUsers = async (req, res) => {
     });
   } catch (error) {
     console.error('[Get Users Error]:', error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Delete user account (Admin only, e.g. delete test/spam accounts)
+// @route   DELETE /api/auth/users/:id
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User account not found' });
+    }
+
+    if (user.email === 'gamot0105@gmail.com') {
+      return res.status(400).json({ success: false, error: 'Cannot delete primary root admin account.' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    return res.json({ success: true, message: `Account for ${user.email} successfully deleted.` });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Toggle or set user role (Admin only)
+// @route   PUT /api/auth/users/:id/role
+export const updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!['admin', 'customer'].includes(role)) {
+      return res.status(400).json({ success: false, error: 'Role must be admin or customer' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User account not found' });
+    }
+
+    user.role = role;
+    await user.save();
+    return res.json({ success: true, message: `User role updated to ${role}`, user });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Change password for logged-in user
+// @route   PUT /api/auth/change-password
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Current password and new password are required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ success: false, error: 'New password must be at least 8 characters long for security' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+    return res.json({ success: true, message: 'Password updated successfully!' });
+  } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
 };

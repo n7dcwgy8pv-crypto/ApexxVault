@@ -32,7 +32,9 @@ import {
   fetchUsersFromDB,
   holdProductInDB,
   createOfferInDB,
-  subscribeDropAlerts
+  subscribeDropAlerts,
+  sanitizeAndDeduplicateCatalogInDB,
+  updateOrderStatusInDB
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 
@@ -192,6 +194,130 @@ export const AuctionProvider = ({ children }) => {
   const [offerProduct, setOfferProduct] = useState(null);
   const [heldProductIds, setHeldProductIds] = useState({});
 
+  // Legal Modal State (Finding A3, C1)
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalPolicyMode, setLegalPolicyMode] = useState('privacy'); // 'privacy' | 'terms' | 'as-is' | 'pickup'
+
+  const openLegalModal = useCallback((mode = 'privacy') => {
+    setLegalPolicyMode(mode);
+    setIsLegalModalOpen(true);
+  }, []);
+
+  const closeLegalModal = useCallback(() => {
+    setIsLegalModalOpen(false);
+  }, []);
+
+  // 30-Minute Cart Reservation Hold Timer (Urgency + Fair Inventory)
+  const [cartHoldExpiresAt, setCartHoldExpiresAt] = useState(() => {
+    try {
+      const saved = localStorage.getItem('apexvault_cart_hold_expiry');
+      return saved ? parseInt(saved, 10) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [cartHoldSecondsRemaining, setCartHoldSecondsRemaining] = useState(0);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      if (!cartHoldExpiresAt || cartHoldExpiresAt <= Date.now()) {
+        const newExpiry = Date.now() + 30 * 60 * 1000; // 30 minutes
+        setCartHoldExpiresAt(newExpiry);
+        try {
+          localStorage.setItem('apexvault_cart_hold_expiry', newExpiry.toString());
+        } catch {}
+      }
+    } else {
+      setCartHoldExpiresAt(null);
+      try {
+        localStorage.removeItem('apexvault_cart_hold_expiry');
+      } catch {}
+    }
+  }, [cart.length, cartHoldExpiresAt]);
+
+  useEffect(() => {
+    if (!cartHoldExpiresAt || cart.length === 0) {
+      setCartHoldSecondsRemaining(0);
+      return;
+    }
+    const updateCountdown = () => {
+      const remaining = Math.max(0, Math.floor((cartHoldExpiresAt - Date.now()) / 1000));
+      setCartHoldSecondsRemaining(remaining);
+      if (remaining <= 0 && cart.length > 0) {
+        showAlert('Your 30-minute cart reservation hold has expired. Items were released to the vault.');
+        setCart([]);
+        setCartHoldExpiresAt(null);
+        try {
+          localStorage.removeItem('apexvault_cart_hold_expiry');
+        } catch {}
+      }
+    };
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [cartHoldExpiresAt, cart.length, showAlert]);
+
+  const cartHoldCountdown = useMemo(() => {
+    if (cartHoldSecondsRemaining <= 0) return '00:00';
+    const mins = Math.floor(cartHoldSecondsRemaining / 60);
+    const secs = cartHoldSecondsRemaining % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }, [cartHoldSecondsRemaining]);
+
+  // URL Hash Listener (#privacy, #terms, #as-is, #pickup, #admin)
+  useEffect(() => {
+    const handleHash = () => {
+      try {
+        const hash = window.location.hash.toLowerCase();
+        if (hash === '#privacy') openLegalModal('privacy');
+        else if (hash === '#terms') openLegalModal('terms');
+        else if (hash === '#as-is' || hash === '#asis') openLegalModal('as-is');
+        else if (hash === '#pickup') openLegalModal('pickup');
+        else if (hash === '#admin') {
+          if (currentUser?.role === 'admin') {
+            setIsAdminPortalOpen(true);
+          } else {
+            setAuthModalMode('login');
+            setIsAuthModalOpen(true);
+          }
+        }
+      } catch {}
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [currentUser, openLegalModal]);
+
+  // Direct Lot URL Query Listener (?lot=SKU or ?item=SKU)
+  useEffect(() => {
+    if (products.length > 0) {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const lotParam = urlParams.get('lot') || urlParams.get('item');
+        if (lotParam) {
+          const matched = products.find(
+            (p) =>
+              (p.sku && p.sku.toLowerCase() === lotParam.toLowerCase()) ||
+              (p.id && p.id.toString() === lotParam) ||
+              (p._id && p._id.toString() === lotParam)
+          );
+          if (matched) {
+            setSelectedProductModal(matched);
+          }
+        }
+      } catch {}
+    }
+  }, [products]);
+
+  // Dynamic Document Title based on active modal or page state
+  useEffect(() => {
+    if (selectedProductModal) {
+      document.title = `${selectedProductModal.title} (Lot #${selectedProductModal.sku}) | ApexxVault Scarborough`;
+    } else {
+      document.title = 'ApexxVault | Scarborough Liquidation Depot - Up to 75% Off Retail (CAD)';
+    }
+  }, [selectedProductModal]);
+
   // Email Preview Modal & Warehouse Scanner
   const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false);
   const [emailToPreview, setEmailToPreview] = useState(null);
@@ -284,6 +410,29 @@ export const AuctionProvider = ({ children }) => {
       showAlert(`Hold error: ${err.message}`);
     }
   }, [currentUser, showSuccess, showAlert, showInfo, loadProducts]);
+
+  const cancelHoldProduct = useCallback(async (product) => {
+    const prodId = product.id || product._id;
+    try {
+      const res = await holdProductInDB(prodId, 0, {
+        name: `${currentUser?.firstName || 'User'} ${currentUser?.lastName || ''}`.trim(),
+        email: currentUser?.email
+      });
+      if (res.success) {
+        setHeldProductIds((prev) => {
+          const next = { ...prev };
+          delete next[prodId];
+          return next;
+        });
+        showSuccess(`Hold released for "${product.title}". Returned to open catalog.`);
+        loadProducts();
+      } else {
+        showAlert(res.error || 'Failed to cancel hold.');
+      }
+    } catch (err) {
+      showAlert(`Cancel hold error: ${err.message}`);
+    }
+  }, [currentUser, showSuccess, showAlert, loadProducts]);
 
   // Initial load & filter change reload
   useEffect(() => {
@@ -754,6 +903,104 @@ export const AuctionProvider = ({ children }) => {
     setIsEmailPreviewOpen(true);
   }, []);
 
+  // Filtered Products (Finding A1: Instant Zero-Lag Multi-Field Search & Discovery)
+  const filteredProducts = useMemo(() => {
+    if (!Array.isArray(products)) return [];
+    return products
+      .filter((p) => {
+        if (!p) return false;
+        // Category filter
+        if (selectedCategory && selectedCategory !== 'all') {
+          if (p.category !== selectedCategory) return false;
+        }
+        // Condition filter
+        if (selectedConditions && selectedConditions.length > 0) {
+          if (!selectedConditions.includes(p.condition)) return false;
+        }
+        // Stock filter
+        if (stockFilter === 'in_stock') {
+          if (Number(p.stockQty) <= 0) return false;
+        } else if (stockFilter === 'out_of_stock') {
+          if (Number(p.stockQty) > 0) return false;
+        }
+        // Price Max filter
+        if (priceMax && Number(p.price) > priceMax) {
+          return false;
+        }
+        // Search Query filter
+        if (searchQuery && searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase().trim();
+          const matchTitle = p.title?.toLowerCase().includes(q);
+          const matchSku = p.sku?.toLowerCase().includes(q);
+          const matchBrand = p.brand?.toLowerCase().includes(q);
+          const matchModel = p.modelNumber?.toLowerCase().includes(q);
+          const matchCategory = p.category?.toLowerCase().includes(q);
+          const matchDesc = p.description?.toLowerCase().includes(q);
+          const matchTags = Array.isArray(p.tags) && p.tags.some((t) => t?.toLowerCase().includes(q));
+          if (!matchTitle && !matchSku && !matchBrand && !matchModel && !matchCategory && !matchDesc && !matchTags) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'price-asc') return (Number(a.price) || 0) - (Number(b.price) || 0);
+        if (sortBy === 'price-desc') return (Number(b.price) || 0) - (Number(a.price) || 0);
+        if (sortBy === 'discount-desc') {
+          const discA = a.retailMSRP ? (a.retailMSRP - a.price) / a.retailMSRP : 0;
+          const discB = b.retailMSRP ? (b.retailMSRP - b.price) / b.retailMSRP : 0;
+          return discB - discA;
+        }
+        if (sortBy === 'title-asc') return (a.title || '').localeCompare(b.title || '');
+        if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        return 0; // 'featured'
+      });
+  }, [products, selectedCategory, selectedConditions, stockFilter, priceMax, searchQuery, sortBy]);
+
+  // Catalog Sanitization Action (Finding C3, C4, C6, C7, A7, A8, A10, A11)
+  const sanitizeCatalogAction = useCallback(async () => {
+    try {
+      const res = await sanitizeAndDeduplicateCatalogInDB();
+      if (res.success) {
+        showSuccess(`Catalog sanitized! Cleaned ${res.updatedCount || 0} listings, resolved ${res.mergedDuplicates || 0} duplicates.`);
+        await loadProducts();
+        return res;
+      } else {
+        showAlert(res.error || 'Failed to sanitize catalog.');
+        return res;
+      }
+    } catch (err) {
+      showAlert(`Sanitization error: ${err.message}`);
+      return { success: false, error: err.message };
+    }
+  }, [loadProducts, showAlert, showSuccess]);
+
+  // Order Lifecycle Status Transitions (Finding A12: Reserved -> Paid -> Ready -> Picked Up / Cancelled / Refunded)
+  const transitionOrderStatus = useCallback(
+    async (orderId, statusData) => {
+      try {
+        const res = await updateOrderStatusInDB(orderId, statusData);
+        if (res.success) {
+          showSuccess(`Order ${orderId} updated to "${statusData.status}".`);
+          setOrders((prev) =>
+            prev.map((ord) =>
+              (ord.orderId === orderId || ord._id === orderId) ? (res.order || res.data || ord) : ord
+            )
+          );
+          await loadProducts();
+          return res;
+        } else {
+          showAlert(res.error || 'Failed to update order status.');
+          return res;
+        }
+      } catch (err) {
+        showAlert(`Order update error: ${err.message}`);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadProducts, showAlert, showSuccess]
+  );
+
   return (
     <AuctionContext.Provider
       value={{
@@ -775,14 +1022,19 @@ export const AuctionProvider = ({ children }) => {
         isAdminPortalOpen,
         setIsAdminPortalOpen,
         products,
-        filteredProducts: products,
+        filteredProducts,
         isLoadingProducts,
         loadProducts,
         cart,
+        setCart,
         cartTotals,
+        cartHoldSecondsRemaining,
+        cartHoldCountdown,
         watchlist,
         orders,
+        setOrders,
         lastOrder,
+        setLastOrder,
         savedCustomer,
         setSavedCustomer,
         catalogStats,
@@ -850,6 +1102,15 @@ export const AuctionProvider = ({ children }) => {
         openMakeOffer,
         heldProductIds,
         triggerHoldProduct,
+        cancelHoldProduct,
+        isLegalModalOpen,
+        setIsLegalModalOpen,
+        legalPolicyMode,
+        setLegalPolicyMode,
+        openLegalModal,
+        closeLegalModal,
+        sanitizeCatalogAction,
+        transitionOrderStatus,
         showSuccess,
         showAlert,
         showInfo

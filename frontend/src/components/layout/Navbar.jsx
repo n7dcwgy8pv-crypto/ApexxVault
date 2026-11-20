@@ -1,340 +1,283 @@
 import React, { useState } from 'react';
 import {
   Search,
-  UploadCloud,
   Heart,
   ShoppingCart,
-  ShieldCheck,
-  CreditCard,
-  ScanLine,
-  Mail,
-  Sun,
-  Moon,
-  X,
   User,
-  LogOut,
-  LogIn,
-  LayoutDashboard,
-  Shield,
-  DollarSign,
-  ShoppingBag,
-  Package
+  Menu,
+  X,
+  Phone,
+  MapPin,
+  Clock,
+  Sparkles,
+  ArrowRight,
+  Shield
 } from 'lucide-react';
 import { useAuction } from '../../context/AuctionContext';
+import { useRouter, Link } from '../../context/RouterContext';
 import { CATEGORIES } from '../../data/auctionEvents';
 
 export const Navbar = () => {
   const {
-    theme,
-    toggleTheme,
     currentUser,
     isLoggedIn,
     isAdmin,
-    logout,
-    setIsAuthModalOpen,
-    setAuthModalMode,
-    setIsAdminPortalOpen,
-    searchQuery,
-    setSearchQuery,
-    selectedCategory,
-    setSelectedCategory,
     watchlist,
     cartTotals,
-    setIsBulkUploadOpen,
     setIsWatchlistOpen,
-    setIsCartOpen,
-    setIsStripeSettingsOpen,
-    setIsScannerOpen,
-    setIsEmailSettingsOpen,
-    setIsCustomerPortalOpen,
-    resetCatalog
+    setIsCartOpen
   } = useAuction();
 
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const { navigate, currentPath } = useRouter();
+
+  const [searchInputValue, setSearchInputValue] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    if (!searchInputValue.trim()) return;
+    navigate(`/search?q=${encodeURIComponent(searchInputValue.trim())}`);
+    setMobileSearchOpen(false);
   };
 
+  const navLinks = [
+    { label: 'Home', href: '/' },
+    { label: 'Shop All', href: '/collections/all' },
+    { label: 'Categories', href: '/pages/categories' },
+    { label: 'Deal of the Week', href: '/#deal-of-the-week' },
+    { label: 'About Us', href: '/pages/about-us' },
+    { label: 'Contact', href: '/pages/contact' }
+  ];
+
   return (
-    <header className="main-navbar">
-      <div className="container navbar-container">
-        {/* Official Brand Logo: Emblem + Name */}
-        <a
-          href="#"
-          className="brand-logo"
-          onClick={(e) => {
-            e.preventDefault();
-            resetCatalog && resetCatalog();
-          }}
-          title="ApexxVault — Return to Main Inventory"
+    <header className="site-header">
+      <div className="container header-container">
+        {/* Mobile Hamburger Button */}
+        <button
+          type="button"
+          className="mobile-menu-trigger"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open mobile navigation menu"
         >
+          <Menu size={24} />
+        </button>
+
+        {/* Official ApexxVault 3D Emblem & 3D Metallic Wordmark */}
+        <Link to="/" className="site-brand-logo" title="ApexxVault — Premier Liquidation Depot">
           <img
-            src="/logo-icon.png"
-            alt="ApexxVault Emblem"
-            className="brand-logo-emblem"
+            src="/apexxvault-brand-logo.png"
+            alt="ApexxVault"
+            className="brand-logo-full-img"
           />
-          <span className="brand-logo-text">APEXXVAULT</span>
-        </a>
+        </Link>
 
-        {/* Search Bar with Category Filter */}
-        <div className="nav-search-wrapper">
-          <form className="nav-search-bar" onSubmit={handleSearchSubmit}>
-            <select
-              className="search-category-select"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              aria-label="Filter by department"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+        {/* Desktop Navigation Links */}
+        <nav className="desktop-nav" aria-label="Main Navigation">
+          {navLinks.map((item) => {
+            const isActive = currentPath === item.href;
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`nav-link ${isActive ? 'active' : ''}`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
 
+        {/* Search Input Bar (Desktop) */}
+        <div className="header-search-desktop">
+          <form onSubmit={handleSearchSubmit} className="header-search-form">
+            <Search size={16} className="search-icon-inside" />
             <input
               type="text"
-              className="nav-search-input"
-              placeholder="Search assets by SKU, brand, model..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search assets"
+              placeholder="Search tools, laptops, appliances..."
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              className="search-input"
+              aria-label="Search catalog"
             />
-
-            {searchQuery && (
+            {searchInputValue && (
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ color: 'var(--text-muted)', padding: '0 0.4rem', cursor: 'pointer' }}
-                title="Clear Search"
+                onClick={() => setSearchInputValue('')}
+                className="search-clear-btn"
+                aria-label="Clear search"
               >
-                <X size={16} />
+                <X size={14} />
               </button>
             )}
-
-            <button
-              type="submit"
-              className="search-submit-btn"
-              title="Search Catalog"
-              aria-label="Search"
-            >
-              <Search size={15} />
-            </button>
           </form>
         </div>
 
-        {/* Action Controls */}
-        <div className="nav-actions">
-          {/* Admin Portal Button (If Admin or Quick Access) */}
-          {isAdmin && (
-            <button
-              onClick={() => setIsAdminPortalOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                background: 'var(--gold-bg)',
-                border: '1px solid rgba(245, 158, 11, 0.4)',
-                color: 'var(--gold-light)',
-                padding: '0.45rem 0.95rem',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-              title="Open Admin Management Suite"
-            >
-              <Shield size={15} />
-              <span>Admin Portal</span>
-            </button>
-          )}
-
-          {/* User Account / Sign In Trigger */}
-          {isLoggedIn ? (
-            <div style={{ position: 'relative' }}>
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-muted)',
-                  color: 'var(--text-primary)',
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.825rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                <div
-                  style={{
-                    width: '22px',
-                    height: '22px',
-                    borderRadius: '50%',
-                    background: 'var(--emerald-bg)',
-                    color: 'var(--emerald-light)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  {currentUser?.firstName?.[0] || 'U'}
-                </div>
-                <span>{currentUser?.firstName}</span>
-              </button>
-
-              {showUserDropdown && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    right: 0,
-                    top: 'calc(100% + 8px)',
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-muted)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.5rem',
-                    minWidth: '200px',
-                    boxShadow: 'var(--shadow-md)',
-                    zIndex: 100
-                  }}
-                >
-                  <div style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border-subtle)', marginBottom: '0.35rem' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                      {currentUser?.firstName} {currentUser?.lastName}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {currentUser?.email}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--emerald-light)', marginTop: '2px', fontWeight: 600 }}>
-                      Role: {currentUser?.role}
-                    </div>
-                  </div>
-
-                  {/* Customer Account & Offers Portal Link */}
-                  <button
-                    onClick={() => {
-                      setShowUserDropdown(false);
-                      setIsCustomerPortalOpen(true);
-                    }}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.5rem 0.75rem',
-                      fontSize: '0.825rem',
-                      color: 'var(--emerald-light)',
-                      borderRadius: 'var(--radius-xs)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <DollarSign size={14} />
-                    <span>My Offers &amp; Account Hub</span>
-                  </button>
-
-                  {isAdmin && (
-                    <button
-                      onClick={() => {
-                        setShowUserDropdown(false);
-                        setIsAdminPortalOpen(true);
-                      }}
-                      style={{
-                        width: '100%',
-                        textAlign: 'left',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem 0.75rem',
-                        fontSize: '0.825rem',
-                        color: 'var(--gold-light)',
-                        borderRadius: 'var(--radius-xs)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <LayoutDashboard size={14} />
-                      <span>Admin Management Portal</span>
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      setShowUserDropdown(false);
-                      logout();
-                    }}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.5rem 0.75rem',
-                      fontSize: '0.825rem',
-                      color: 'var(--rose-primary)',
-                      borderRadius: 'var(--radius-xs)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <LogOut size={14} />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={() => {
-                setAuthModalMode('login');
-                setIsAuthModalOpen(true);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-muted)',
-                color: 'var(--text-primary)',
-                padding: '0.48rem 0.95rem',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.825rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-              title="Sign in or register to purchase items"
-            >
-              <LogIn size={15} color="var(--emerald-light)" />
-              <span>Sign In / Register</span>
-            </button>
-          )}
-
-          {/* Saved Wishlist */}
+        {/* Right Action Icons: Search (mobile), Account, Wishlist, Cart */}
+        <div className="header-actions">
+          {/* Mobile Search Toggle */}
           <button
-            className="nav-icon-btn"
-            onClick={() => setIsWatchlistOpen(true)}
-            title="View Saved Assets"
-            aria-label="Wishlist"
+            type="button"
+            className="header-action-btn mobile-search-btn"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            aria-label="Toggle search"
           >
-            <Heart size={18} />
+            <Search size={20} />
+          </button>
+
+          {/* Admin Management Button (Only visible to authenticated administrators) */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="header-action-btn admin-portal-btn"
+              title="Admin Management Suite"
+              aria-label="Admin Portal"
+              style={{ color: 'var(--accent-gold)' }}
+            >
+              <Shield size={20} />
+              <span className="action-btn-text" style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
+                Admin
+              </span>
+            </Link>
+          )}
+
+          {/* Account Icon */}
+          <Link
+            to="/account"
+            className="header-action-btn"
+            title={isLoggedIn ? `Account (${currentUser?.firstName})` : 'Sign In / Register'}
+            aria-label="Account"
+          >
+            <User size={20} />
+            <span className="action-btn-text">
+              {isLoggedIn ? currentUser?.firstName : 'Account'}
+            </span>
+          </Link>
+
+          {/* Wishlist Icon */}
+          <button
+            type="button"
+            className="header-action-btn"
+            onClick={() => setIsWatchlistOpen(true)}
+            title="Saved Lots"
+            aria-label="Saved Lots"
+          >
+            <Heart size={20} />
             {watchlist.length > 0 && (
-              <span className="badge-count">{watchlist.length}</span>
+              <span className="action-badge">{watchlist.length}</span>
             )}
           </button>
 
-          {/* Theme Switcher Toggle */}
+          {/* Cart Icon */}
           <button
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            title={`Switch to ${theme === 'dark' ? 'Crisp Light' : 'Luxury Dark'} Mode`}
-            aria-label="Toggle Theme"
+            type="button"
+            className="header-action-btn cart-btn-action"
+            onClick={() => navigate('/cart')}
+            title="View Cart"
+            aria-label="Shopping Cart"
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <ShoppingCart size={20} />
+            {cartTotals.itemCount > 0 && (
+              <span className="action-badge cart-badge">{cartTotals.itemCount}</span>
+            )}
           </button>
         </div>
       </div>
+
+      {/* Mobile Search Overlay Bar */}
+      {mobileSearchOpen && (
+        <div className="mobile-search-bar-row container">
+          <form onSubmit={handleSearchSubmit} className="mobile-search-form">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Search overstock & liquidation lots..."
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              autoFocus
+            />
+            <button type="submit" className="mobile-search-submit">
+              Search
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu-drawer-backdrop" onClick={() => setMobileMenuOpen(false)}>
+          <div
+            className="mobile-menu-drawer"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="mobile-drawer-header">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: 'none' }}>
+                <img
+                  src="/apexxvault-brand-logo.png"
+                  alt="ApexxVault"
+                  style={{ height: '36px', width: 'auto', display: 'block' }}
+                />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+                style={{ padding: '0.5rem', cursor: 'pointer' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <nav className="mobile-nav-list">
+              {navLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="mobile-nav-item"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>{item.label}</span>
+                  <ArrowRight size={16} color="var(--ink-muted)" />
+                </Link>
+              ))}
+            </nav>
+
+            <div className="mobile-drawer-divider" />
+
+            {/* Category Quick Links */}
+            <div className="mobile-categories-section">
+              <p className="mobile-section-label">Browse Departments</p>
+              <div className="mobile-categories-chips">
+                {CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/collections/${cat.id}`}
+                    className="mobile-category-chip"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="mobile-drawer-footer">
+              <div className="flex items-center gap-2" style={{ fontSize: '0.825rem', color: 'var(--ink-muted)', marginBottom: '0.5rem' }}>
+                <MapPin size={14} color="var(--accent-gold)" />
+                <span>705 Progress Ave #32, Scarborough, ON</span>
+              </div>
+              <div className="flex items-center gap-2" style={{ fontSize: '0.825rem', color: 'var(--ink-muted)' }}>
+                <Phone size={14} color="var(--accent-gold)" />
+                <span>(416) 571-6702</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
+
+export default Navbar;
